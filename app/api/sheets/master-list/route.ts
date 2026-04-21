@@ -1,6 +1,8 @@
 import { getMasterList } from '@/lib/api/sheets';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const employees = await getMasterList();

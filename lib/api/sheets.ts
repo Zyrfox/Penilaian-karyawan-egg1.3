@@ -33,13 +33,16 @@ export async function getMasterList() {
     const rows = response.data.values;
     if (!rows || rows.length < 2) return [];
 
-    return rows.slice(1).map((row) => ({
-      id: row[0] || '',
-      name: row[1] || '',
-      position: row[2] || '',
-      outlet: row[3] || '',
-      status: row[4] || 'Aktif',
-    }));
+    return rows
+      .slice(1)
+      .filter(row => row[1] && row[1].trim() !== '') // Hanya ambil row yang memiliki "Nama Lengkap"
+      .map((row) => ({
+        id: row[0] || '',
+        name: row[1] || '',
+        position: row[2] || '',
+        outlet: row[3] || '',
+        status: row[4] || 'Aktif',
+      }));
   } catch (error: any) {
     console.error('getSheetsError (MasterList):', error);
     throw new Error('Gagal mengambil data dari server. Coba lagi.');
