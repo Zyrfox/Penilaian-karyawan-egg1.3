@@ -83,8 +83,10 @@ export function groupByEmployeeForRecap(
   return Array.from(grouped.entries())
     .map(([empId, ratingRecords]) => {
       const employee = employees.find(e => e.id === empId);
-      const averageScore = ratingRecords.reduce((sum, r) => sum + (r.totalPoint / 5), 0) / ratingRecords.length;
-      const totalPoints = Math.round(averageScore * 5);
+      // totalPoint sudah dalam skala 1–5 (rata-rata nilai A/B/C/D/E)
+      // JANGAN dibagi 5 lagi — itu menyebabkan B(4.23) menjadi 0.86 (E)
+      const averageScore = ratingRecords.reduce((sum, r) => sum + r.totalPoint, 0) / ratingRecords.length;
+      const totalPoints = Math.round(averageScore);
 
       return {
         no: rowNo++,
@@ -95,7 +97,7 @@ export function groupByEmployeeForRecap(
         raters: ratingRecords.map(r => ({
           raterId: r.namaPenilai,
           raterName: r.namaPenilai,
-          averageScore: r.totalPoint / 5,
+          averageScore: r.totalPoint, // sudah skala 1–5
           submittedDate: r.tanggal
         })),
         averageScore,

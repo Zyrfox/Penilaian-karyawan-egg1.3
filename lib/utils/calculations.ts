@@ -38,13 +38,13 @@ export function calculateTotalPoints(
   ratings: Record<RatingCategory, RatingGrade>,
   isRamadan: boolean = false
 ): number {
-  const average = calculateAverageScore(ratings, isRamadan);
-  return Math.round(average * 5);
+  // totalPoints = dibulatkan dari rata-rata (skala 1-5)
+  return Math.round(calculateAverageScore(ratings, isRamadan));
 }
 
-export function calculatePredikat(totalPoints: number): RatingGrade {
-  const average = totalPoints / 5;
-  return pointToGrade(average);
+export function calculatePredikat(avgScore: number): RatingGrade {
+  // avgScore sudah dalam skala 1-5
+  return pointToGrade(avgScore);
 }
 
 export function isRamadan(): boolean {
@@ -68,7 +68,8 @@ export function normalizeLeaderboardScores(
 
   // Calculate raw averages per employee
   const employeeScores = Array.from(byEmployee.entries()).map(([empId, records]) => {
-    const rawAverage = records.reduce((sum, r) => sum + r.totalPoint / 5, 0) / records.length;
+    // totalPoint dari sheet sudah dalam skala 1-5, tidak perlu dibagi 5 lagi
+    const rawAverage = records.reduce((sum, r) => sum + r.totalPoint, 0) / records.length;
     const employee = employees.find(e => e.id === empId);
     return {
       employeeId: empId,
@@ -112,7 +113,7 @@ export function normalizeLeaderboardScores(
       ratingCount: score.ratingCount,
       rawAverage: score.rawAverage,
       normalizedScore,
-      totalPoints: Math.round(normalizedScore * 5)
+      totalPoints: Math.round(normalizedScore)
     };
   });
 

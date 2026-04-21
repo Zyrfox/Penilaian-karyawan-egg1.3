@@ -1,85 +1,192 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { RatingCard } from '@/components/penilaian/RatingCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { canUserRate } from '@/lib/utils/validators';
 import { isRamadan } from '@/lib/utils/calculations';
+import { RATING_CATEGORIES } from '@/lib/utils/constants';
+import { RatingCategory, RatingGrade, RATING_SCALE } from '@/lib/types';
+
+function calculateTotalPoint(ratings: Record<string, string>, isRamadanPeriod: boolean): number {
+  const values = Object.entries(ratings)
+    .filter(([id, val]) => {
+      if (!val || val === '' || val === '-') return false;
+      const cat = RATING_CATEGORIES.find((c) => c.id === id);
+      if (!cat) return false;
+      if (cat.section === 'IBADAH') return isRamadanPeriod;
+      return true;
+    })
+    .map(([, val]) => RATING_SCALE[val as RatingGrade] || 0);
+
+  if (values.length === 0) return 0;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function getPredikat(avg: number): string {
+  const rounded = Math.round(avg);
+  const map: Record<number, string> = { 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'E' };
+  return map[rounded] || 'E';
+}
+
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error' | 'info'; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 5000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  const colors = {
+    success: 'bg-emerald-600',
+    error: 'bg-red-600',
+    info: 'bg-blue-600',
+  };
+
+  return (
+    <div className={`fixed top-6 right-6 z-50 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl text-white max-w-sm ${colors[type]} animate-fade-in`}>
+      <span className="text-lg flex-shrink-0">{type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+      <p className="text-sm font-semibold leading-snug">{message}</p>
+      <button onClick={onClose} className="ml-auto text-white/70 hover:text-white text-lg leading-none flex-shrink-0">×</button>
+    </div>
+  );
+}
+
+function ConfirmModal({
+  count,
+  onConfirm,
+  onCancel,
+  submitting,
+}: {
+  count: number;
+  onConfirm: () => void;
+  onCancel: () => void;
+  submitting: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+        <div className="w-14 h-14 rounded-2xl bg-neutral-900 flex items-center justify-center mb-5 mx-auto">
+          <span className="text-2xl">📋</span>
+        </div>
+        <h2 className="text-xl font-extrabold text-center text-[#1a1a1a] mb-2">Konfirmasi Submit</h2>
+        <p className="text-sm text-neutral-500 text-center mb-6">
+          Anda akan menyimpan penilaian untuk <span className="font-bold text-neutral-900">{count} karyawan</span> ke server. 
+          Pastikan semua nilai sudah benar sebelum melanjutkan.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={submitting}
+            className="flex-1 py-3 rounded-xl border border-neutral-200 text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all disabled:opacity-50"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={submitting}
+            className="flex-1 py-3 rounded-xl bg-[#1a1a1a] text-white text-sm font-bold hover:bg-black transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              '✅ Ya, Simpan Sekarang'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PenilaianPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [employeeMap, setEmployeeMap] = useState<Record<string, any>>({});
   const [alreadyRatedIds, setAlreadyRatedIds] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, any>>({});
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const ramadan = isRamadan();
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ message, type });
+  }, []);
 
   useEffect(() => {
     checkAuthAndLoadData();
   }, []);
 
   const checkAuthAndLoadData = async () => {
-    // 1. Simulating auth check since we're using cookies. For a proper app, 
-    // we'd probably have an /api/auth/me route. We'll extract basic user info from localStorage if present
-    // For now, assume MGR-001 is hardcoded fallback if needed, or redirect
-    
-    // In real flow, fetch user info from API
-    // Setting up a mockup flow to test UI
-    const mockUser = {
-      id: 'MGR-001',
-      name: 'Manager Operasional',
-      role: 'manager',
-      outlet: 'BTM'
-    };
-    setCurrentUser(mockUser);
+    // 1. Ambil user dari JWT cookie via /api/auth/me
+    let activeUser: any = null;
+    try {
+      const resMe = await fetch('/api/auth/me');
+      if (!resMe.ok) {
+        router.push('/login');
+        return;
+      }
+      const dataMe = await resMe.json();
+      if (!dataMe.success || !dataMe.user) {
+        router.push('/login');
+        return;
+      }
+      activeUser = dataMe.user;
+      setCurrentUser(activeUser);
+    } catch {
+      router.push('/login');
+      return;
+    }
 
     try {
-      // Fetch Master List
-      const resMaster = await fetch('/api/sheets/master-list');
+      const [resMaster, resPenilaian] = await Promise.all([
+        fetch('/api/sheets/master-list'),
+        fetch('/api/sheets/penilaian'),
+      ]);
       const dataMaster = await resMaster.json();
-      
-      // Fetch existing Penilaian to lock cards
-      const resPenilaian = await fetch('/api/sheets/penilaian');
       const dataPenilaian = await resPenilaian.json();
 
       if (dataMaster.success) {
-        // Filter out employees we can't rate
-        let rateable = dataMaster.data.filter((emp: any) => 
-          canUserRate(mockUser.role, mockUser.outlet, mockUser.id, emp.id, emp.outlet).canRate
+        let rateable = dataMaster.data.filter((emp: any) =>
+          canUserRate(activeUser.role, activeUser.outlet, activeUser.id, emp.id, emp.outlet).canRate
         );
-
-        // Deduplicate employee IDs in case the Google Sheet has accidental duplicates
-        rateable = rateable.filter((value: any, index: number, self: any[]) => 
-          index === self.findIndex((t) => t.id === value.id)
+        rateable = rateable.filter((v: any, i: number, self: any[]) =>
+          i === self.findIndex((t) => t.id === v.id)
         );
-
         setEmployees(rateable);
 
-        // Pre-load drafts from localstorage
+        // Build employee map for later lookup
+        const empMap: Record<string, any> = {};
+        dataMaster.data.forEach((emp: any) => { empMap[emp.id] = emp; });
+        setEmployeeMap(empMap);
+
+        // Load drafts from localStorage
         const localDrafts: Record<string, any> = {};
         rateable.forEach((emp: any) => {
-          const stored = localStorage.getItem(`rating_draft_${mockUser.id}_${emp.id}`);
+          const stored = localStorage.getItem(`rating_draft_${activeUser.id}_${emp.id}`);
           if (stored) {
-            try { localDrafts[emp.id] = JSON.parse(stored); } catch(e){}
+            try { localDrafts[emp.id] = JSON.parse(stored); } catch { /* ignore */ }
           }
         });
         setDrafts(localDrafts);
       }
 
       if (dataPenilaian.success) {
-        // Find who the current user has already rated THIS month
         const now = new Date();
         const thisMonth = now.getMonth();
         const thisYear = now.getFullYear();
-
         const ratedSet = new Set<string>();
         dataPenilaian.data.forEach((row: any) => {
-          if (row.namaPenilai === mockUser.id) {
-            const date = new Date(row.tanggal);
-            if (date.getMonth() === thisMonth && date.getFullYear() === thisYear) {
+          if (row.namaPenilai === activeUser.id) {
+            const d = new Date(row.tanggal);
+            if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) {
               ratedSet.add(row.karyawanDinilai);
             }
           }
@@ -88,23 +195,146 @@ export default function PenilaianPage() {
       }
     } catch (err) {
       console.error(err);
+      showToast('Gagal memuat data karyawan. Coba refresh halaman.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveDraft = (employeeId: string, ratings: any) => {
+  const handleSaveDraft = (employeeId: string, ratings: Record<RatingCategory, RatingGrade>) => {
     if (!currentUser) return;
     localStorage.setItem(`rating_draft_${currentUser.id}_${employeeId}`, JSON.stringify(ratings));
-    setDrafts(prev => ({...prev, [employeeId]: ratings}));
-    alert('Draft disimpan!');
+    setDrafts((prev) => ({ ...prev, [employeeId]: ratings }));
+    showToast('Draft berhasil disimpan secara lokal! 💾', 'info');
   };
 
-  const handleSubmitAll = async () => {
-    // Process submission logic (validate all drafts, prepare payload, POST /append)
-    // Placeholder alert
-    alert('Fitur Submit All sedang dalam pengembangan!');
+  const handleResetAll = () => {
+    if (!currentUser) return;
+    employees.forEach((emp) => {
+      localStorage.removeItem(`rating_draft_${currentUser.id}_${emp.id}`);
+    });
+    setDrafts({});
+    setExpandedId(null);
+    showToast('Semua draft berhasil direset.', 'info');
   };
+
+  const handleSubmitAll = () => {
+    // Check if there are any drafts with filled data
+    const hasDraftData = Object.values(drafts).some((d) => {
+      if (!d) return false;
+      return Object.values(d).some((v) => v && v !== '');
+    });
+
+    if (!hasDraftData) {
+      showToast('Belum ada data penilaian yang diisi. Isi dan simpan draft terlebih dahulu.', 'error');
+      return;
+    }
+    setShowConfirm(true);
+  };
+
+  const executeSubmit = async () => {
+    if (!currentUser) return;
+    setSubmitting(true);
+
+    try {
+      // Build rows from drafts
+      const rows: any[][] = [];
+      const now = new Date();
+      const timestamp = now.toLocaleString('sv-SE'); // YYYY-MM-DD HH:mm:ss
+
+      for (const emp of employees) {
+        const ratings = drafts[emp.id];
+        if (!ratings) continue;
+
+        // Check if all required categories are filled
+        const requiredCats = RATING_CATEGORIES.filter((c) => c.required);
+        const missingRequired = requiredCats.filter((c) => !ratings[c.id] || ratings[c.id] === '');
+        if (missingRequired.length > 0) {
+          showToast(
+            `${emp.name} belum lengkap. Kategori yang kosong: ${missingRequired.map((c) => c.label).join(', ')}`,
+            'error'
+          );
+          setSubmitting(false);
+          setShowConfirm(false);
+          return;
+        }
+
+        // Check duplicate (already rated this month)
+        if (alreadyRatedIds.has(emp.id)) {
+          continue; // skip already-rated employees
+        }
+
+        const empInfo = employeeMap[emp.id] || emp;
+        const avg = calculateTotalPoint(ratings, ramadan);
+        const predikat = getPredikat(avg);
+
+        // Build the row as per sheet schema (columns A-W)
+        const row = [
+          timestamp,                          // A: Tanggal
+          currentUser.id,                     // B: Nama Penilai
+          emp.id,                             // C: Karyawan yang dinilai
+          empInfo.position || '',             // D: Posisi
+          empInfo.outlet || '',               // E: Outlet
+          'Aktif',                            // F: Status
+          ratings['komunikasi'] || '',        // G
+          ratings['kerja_sama'] || '',        // H
+          ratings['tanggung_jawab'] || '',    // I
+          ratings['inisiatif'] || '',         // J
+          ratings['penguasaan_sop'] || '',    // K
+          ratings['ketelitian'] || '',        // L
+          ratings['kemampuan_tool'] || '',    // M
+          ratings['konsistensi'] || '',       // N
+          ratings['kedisiplinan'] || '',      // O
+          ratings['kepatuhan'] || '',         // P
+          ratings['etika'] || '',             // Q
+          ratings['lingkungan'] || '',        // R
+          ratings['ramah_pelanggan'] || '',   // S
+          ratings['sholat'] || '',            // T
+          ratings['puasa'] || '',             // U
+          avg.toFixed(2),                     // V: Total Point
+          predikat,                           // W: Predikat
+        ];
+        rows.push(row);
+      }
+
+      if (rows.length === 0) {
+        showToast('Tidak ada penilaian baru yang siap dikirim. Pastikan draft sudah diisi.', 'info');
+        setSubmitting(false);
+        setShowConfirm(false);
+        return;
+      }
+
+      const res = await fetch('/api/sheets/append', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Clear drafts after success
+        employees.forEach((emp) => {
+          localStorage.removeItem(`rating_draft_${currentUser.id}_${emp.id}`);
+        });
+        setDrafts({});
+        setExpandedId(null);
+        setShowConfirm(false);
+        showToast(`Berhasil menyimpan penilaian ${rows.length} karyawan ke server! 🎉`, 'success');
+        // Refresh to update locked state
+        setTimeout(() => checkAuthAndLoadData(), 1000);
+      } else {
+        showToast(data.error || 'Gagal menyimpan penilaian. Coba lagi.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Terjadi kesalahan jaringan. Draft masih tersimpan, coba lagi.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const draftCount = Object.values(drafts).filter((d) => d && Object.values(d).some((v) => v && v !== '')).length;
 
   if (loading) {
     return (
@@ -116,21 +346,38 @@ export default function PenilaianPage() {
 
   return (
     <div className="h-screen bg-[#e8ecf1] flex flex-col md:flex-row p-4 sm:p-6 gap-4 md:gap-6 font-sans overflow-hidden">
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
+      {showConfirm && (
+        <ConfirmModal
+          count={draftCount}
+          onConfirm={executeSubmit}
+          onCancel={() => setShowConfirm(false)}
+          submitting={submitting}
+        />
+      )}
+
       <Sidebar currentUser={currentUser} />
-      
+
       <main className="flex-1 overflow-y-auto bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div>
-        
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none" />
+
         <div className="p-8 sm:p-12 h-full flex flex-col">
-          <div className="mb-10 flex justify-between items-end relative z-10">
+          <div className="mb-8 flex justify-between items-end relative z-10">
             <div>
               <h2 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2">Penilaian Karyawan</h2>
               <p className="text-sm text-neutral-500 font-medium">Beri penilaian kinerja bulanan secara objektif dan akurat.</p>
             </div>
-            {/* Quick Stats or Right Addons can go here */}
+            {draftCount > 0 && (
+              <div className="hidden sm:flex items-center gap-2 bg-blue-50 border border-blue-200 px-4 py-2 rounded-xl text-sm font-bold text-blue-700">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                {draftCount} draft tersimpan
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 space-y-4 relative z-10 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3 relative z-10">
             {employees.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white border border-dashed border-neutral-300 rounded-2xl">
                 <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4 text-2xl">🎉</div>
@@ -138,13 +385,13 @@ export default function PenilaianPage() {
                 <p className="text-neutral-500 text-sm">Tidak ada karyawan yang perlu Anda nilai saat ini.</p>
               </div>
             ) : (
-              employees.map(emp => (
-                <RatingCard 
+              employees.map((emp) => (
+                <RatingCard
                   key={emp.id}
                   employee={emp}
                   isExpanded={expandedId === emp.id}
                   isLocked={alreadyRatedIds.has(emp.id)}
-                  isRamadan={isRamadan()}
+                  isRamadan={ramadan}
                   draftRatings={drafts[emp.id] || null}
                   onToggleExpand={(id) => setExpandedId(expandedId === id ? null : id)}
                   onSaveDraft={handleSaveDraft}
@@ -154,15 +401,19 @@ export default function PenilaianPage() {
           </div>
 
           {employees.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-neutral-200/50 flex justify-between items-center relative z-10">
-              <button className="px-5 py-2.5 text-sm font-bold text-red-600 bg-white hover:bg-red-50 border border-red-100 rounded-xl transition-all shadow-sm">
+            <div className="mt-6 pt-6 border-t border-neutral-200/50 flex justify-between items-center relative z-10 gap-4">
+              <button
+                onClick={handleResetAll}
+                className="px-5 py-2.5 text-sm font-bold text-red-600 bg-white hover:bg-red-50 border border-red-100 rounded-xl transition-all shadow-sm"
+              >
                 Reset Semua Draft
               </button>
-              <button 
+              <button
                 onClick={handleSubmitAll}
-                className="px-6 py-3 text-sm font-bold text-white bg-[#1a1a1a] hover:bg-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all"
+                disabled={draftCount === 0}
+                className="px-6 py-3 text-sm font-bold text-white bg-[#1a1a1a] hover:bg-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
               >
-                Simpan & Submit ke Server
+                {draftCount > 0 ? `Simpan ${draftCount} Penilaian ke Server` : 'Simpan & Submit ke Server'}
               </button>
             </div>
           )}

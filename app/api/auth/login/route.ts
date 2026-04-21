@@ -1,6 +1,7 @@
 import { validateLoginCredentials } from '@/lib/utils/validators';
 import { VALID_CREDENTIALS, MANAGERS } from '@/lib/utils/constants';
 import { signToken } from '@/lib/api/auth';
+import { getMasterList } from '@/lib/api/sheets';
 import { NextRequest, NextResponse } from 'next/server';
 import { User, UserRole } from '@/lib/types';
 
@@ -18,34 +19,44 @@ export async function POST(request: NextRequest) {
     }
 
     const role: UserRole = MANAGERS.includes(username) ? 'manager' : 'supervisor';
-    // MGRs typically have access to everything, SPVs are linked to their outlet which is the first part of their ID
     const outlet = username.split('-')[0];
 
-    // Build the user model
+    // Ambil nama asli dari Master List
+    let displayName = username;
+    let displayPosition = '';
+    try {
+      const masterList = await getMasterList();
+      const empData = masterList.find((e: any) => e.id === username);
+      if (empData) {
+        displayName = empData.name;
+        displayPosition = empData.position;
+      }
+    } catch {
+      // Jika gagal, fallback ke username
+    }
+
     const user: User = {
       id: username,
-      name: username, // Would ideally be fetched from Master List in a real implementation
+      name: displayName,
       role,
       outlet,
-      loginTime: new Date().toISOString()
+      loginTime: new Date().toISOString(),
     };
 
-    // Sign the JWT
     const token = await signToken({
       userId: user.id,
       role: user.role,
       name: user.name,
       outlet: user.outlet,
-      loginTime: user.loginTime
+      position: displayPosition,
+      loginTime: user.loginTime,
     });
 
-    // Create the response
     const response = NextResponse.json(
       { success: true, user, token },
       { status: 200 }
     );
 
-    // Set HTTP Only Cookie
     response.cookies.set({
       name: 'auth_token',
       value: token,
