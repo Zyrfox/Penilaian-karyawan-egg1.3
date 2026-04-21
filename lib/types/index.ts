@@ -12,6 +12,8 @@ export interface AuthToken {
   userId: string;
   role: UserRole;
   name: string;
+  outlet?: string;
+  position?: string;
   loginTime: string;
   expiryTime: string;
 }

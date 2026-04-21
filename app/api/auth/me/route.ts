@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
         id: decoded.userId,
         name: decoded.name,
         role: decoded.role,
-        outlet: decoded.outlet,
-        position: (decoded as any).position || '',
+        outlet: decoded.outlet || '',
+        position: decoded.position || '',
         loginTime: decoded.loginTime,
       },
     });
