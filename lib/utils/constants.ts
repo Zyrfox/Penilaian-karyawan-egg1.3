@@ -38,7 +38,7 @@ export const OUTLET_NAMES: Record<OutletCode, string> = {
 };
 
 export const MANAGERS = ['MGR-001', 'MGR-002', 'MGR-003', 'MGR-004', 'FRC-001', 'EGC-001', 'admin.media@easygoing.id'];
-export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-008', 'TSF-011', 'EGC-002'];
+export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-004', 'TSF-008', 'TSF-011', 'EGC-002'];
 
 export const VALID_CREDENTIALS: Record<string, string> = {
   'admin.media@easygoing.id': 'EGG2026',
@@ -53,6 +53,7 @@ export const VALID_CREDENTIALS: Record<string, string> = {
   'BTMF-001': 'EGG2026',
   'TSF-001': 'EGG2026',
   'TSF-002': 'EGG2026',
+  'TSF-004': 'EGG2026',
   'TSF-008': 'EGG2026',
   'TSF-011': 'EGG2026',
   'EGC-002': 'EGG2026',

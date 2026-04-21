@@ -38,7 +38,10 @@ export default function LoginPage() {
             validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTM' });
           }
 
-          setEmployees(validUsers);
+          // Ensure unique IDs in case spreadsheet has duplicates
+          const uniqueUsers = Array.from(new Map(validUsers.map(u => [u.id, u])).values());
+
+          setEmployees(uniqueUsers);
         }
       } catch (err) {
         console.error('Failed to load users:', err);
