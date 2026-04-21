@@ -42,8 +42,8 @@ export function transformToRatingRecords(sheetRows: any[][]): RatingRecord[] {
     .filter(row => row && row.length > 0)
     .map(row => ({
       tanggal: row[0],
-      namaPenilai: row[1],
-      karyawanDinilai: row[2],
+      namaPenilai: row[1]?.split('_')[0] || row[1],
+      karyawanDinilai: row[2]?.split('_')[0] || row[2],
       posisi: row[3],
       outlet: row[4],
       status: row[5],

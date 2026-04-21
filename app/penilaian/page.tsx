@@ -270,9 +270,9 @@ export default function PenilaianPage() {
 
         // Build the row as per sheet schema (columns A-W)
         const row = [
-          timestamp,                          // A: Tanggal
-          currentUser.id,                     // B: Nama Penilai
-          emp.id,                             // C: Karyawan yang dinilai
+          timestamp,                                      // A: Tanggal
+          `${currentUser.id}_${currentUser.name}`,        // B: Nama Penilai
+          `${emp.id}_${empInfo.name}`,                    // C: Karyawan yang dinilai
           empInfo.position || '',             // D: Posisi
           empInfo.outlet || '',               // E: Outlet
           'Aktif',                            // F: Status
