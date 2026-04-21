@@ -135,7 +135,7 @@ export function RatingCard({
       const isReq =
         RATING_CATEGORIES.find((c) => c.id === id)?.required ||
         (isRamadan && ['sholat', 'puasa'].includes(id));
-      return isReq && val !== '' && val !== '-';
+      return isReq && val !== '' && (val as string) !== '-';
     })
     .map(([, val]) => RATING_SCALE[val as RatingGrade] || 0);
 
