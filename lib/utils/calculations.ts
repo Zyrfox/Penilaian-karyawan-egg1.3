@@ -98,10 +98,8 @@ export function normalizeLeaderboardScores(
     ? Array.from(outletAverages.values()).reduce((a, b) => a + b, 0) / outletAverages.size
     : 0;
 
-  // Calculate normalized scores
+  // Calculate normalized scores — simple average, no outlet normalization
   const normalized = employeeScores.map((score, index) => {
-    const outletAvg = outletAverages.get(score.outlet) || globalAvg;
-    const normalizedScore = (score.rawAverage - outletAvg) + globalAvg;
     const employee = employees.find(e => e.id === score.employeeId);
     
     return {
@@ -112,8 +110,8 @@ export function normalizeLeaderboardScores(
       position: employee?.position || 'Unknown',
       ratingCount: score.ratingCount,
       rawAverage: score.rawAverage,
-      normalizedScore,
-      totalPoints: Math.round(normalizedScore)
+      normalizedScore: score.rawAverage, // = rata-rata semua penilai, tanpa normalisasi
+      totalPoints: Math.round(score.rawAverage)
     };
   });
 

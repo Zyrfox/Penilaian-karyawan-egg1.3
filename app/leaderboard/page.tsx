@@ -277,7 +277,7 @@ function LeaderboardContent() {
           <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2">Leaderboard Karyawan</h1>
-              <p className="text-sm text-neutral-500 font-medium">Penilaian Karyawan Terbaik – Fair Output Assessment</p>
+              <p className="text-sm text-neutral-500 font-medium">Rata-rata penilaian karyawan dari semua penilai periode ini</p>
             </div>
             {/* Share Button */}
             <div className="flex-shrink-0">
@@ -366,6 +366,7 @@ function LeaderboardContent() {
                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">Posisi</th>
                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Outlet</th>
                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Score</th>
+                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center hidden md:table-cell">Penilai</th>
                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Predikat</th>
                       </tr>
                     </thead>
@@ -392,9 +393,11 @@ function LeaderboardContent() {
                             <div className={`font-extrabold text-xl ${getScoreColor(row.normalizedScore)}`}>
                               {row.normalizedScore.toFixed(2)}
                             </div>
-                            <div className="text-[10px] font-bold text-neutral-400 tracking-wider uppercase mt-0.5">
-                              Raw: {row.rawAverage.toFixed(2)}
-                            </div>
+                          </td>
+                          <td className="px-6 py-5 text-center hidden md:table-cell">
+                            <span className="text-xs font-bold text-neutral-500">
+                              {row.ratingCount} <span className="font-normal text-neutral-400">orang</span>
+                            </span>
                           </td>
                           <td className="px-6 py-5 text-center">
                             {(() => {
