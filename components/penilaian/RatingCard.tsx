@@ -50,11 +50,20 @@ interface GradeSelectProps {
 function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectProps) {
   const config = value && GRADE_CONFIG[value] ? GRADE_CONFIG[value] : null;
 
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === '__RESET__') {
+      onChange('' as RatingGrade);
+    } else {
+      onChange(val as RatingGrade);
+    }
+  };
+
   return (
     <div className="relative w-full">
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value as RatingGrade)}
+        onChange={handleChange}
         disabled={disabled}
         className={`
           w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl text-sm font-bold
@@ -66,7 +75,12 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
           }
         `}
       >
-        <option value="" className="text-neutral-400 bg-white font-normal">— Batalkan Pilihan</option>
+        {/* Placeholder: hanya tampil saat belum ada pilihan, tidak muncul di daftar dropdown */}
+        <option value="" disabled hidden className="text-neutral-400 bg-white font-normal">Pilih Nilai</option>
+        {/* Opsi reset: hanya muncul di dropdown saat sudah ada nilai dipilih */}
+        {value && value !== '-' && (
+          <option value="__RESET__" className="text-neutral-400 bg-white font-normal italic">— Batalkan Pilihan</option>
+        )}
         {GRADE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-white text-neutral-900 font-normal">
             {opt.label}
