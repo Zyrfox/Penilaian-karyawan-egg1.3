@@ -66,7 +66,7 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
           }
         `}
       >
-        <option value="" disabled className="text-neutral-400 bg-white font-normal">Pilih Nilai</option>
+        <option value="" className="text-neutral-400 bg-white font-normal">— Batalkan Pilihan</option>
         {GRADE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-white text-neutral-900 font-normal">
             {opt.label}
