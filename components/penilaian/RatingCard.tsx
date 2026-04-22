@@ -51,7 +51,7 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
   const config = value && GRADE_CONFIG[value] ? GRADE_CONFIG[value] : null;
 
   return (
-    <div className="relative w-full sm:min-w-[180px]">
+    <div className="relative w-full">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as RatingGrade)}
@@ -218,13 +218,14 @@ export function RatingCard({
                   <h4 className={`text-xs font-extrabold uppercase tracking-widest mb-3 ${SECTION_COLORS[section]}`}>
                     {SECTION_LABELS[section]}
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {cats.map((cat) => (
                       <div
                         key={cat.id}
-                        className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
+                        className="grid items-center gap-3"
+                        style={{ gridTemplateColumns: '1fr 210px' }}
                       >
-                        <label className="text-sm font-semibold text-neutral-700 flex-1">
+                        <label className="text-sm font-semibold text-neutral-700 leading-snug">
                           {cat.label}
                           {section === 'IBADAH' && !isRamadan && (
                             <span className="ml-2 text-neutral-400 font-normal text-xs">(Opsional)</span>
