@@ -1,5 +1,5 @@
 import { validateLoginCredentials } from '@/lib/utils/validators';
-import { VALID_CREDENTIALS, MANAGERS } from '@/lib/utils/constants';
+import { VALID_CREDENTIALS, MANAGERS, DIRECTORS } from '@/lib/utils/constants';
 import { signToken } from '@/lib/api/auth';
 import { getMasterList } from '@/lib/api/sheets';
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const role: UserRole = MANAGERS.includes(username) ? 'manager' : 'supervisor';
+    const role: UserRole = DIRECTORS.includes(username) ? 'direksi' : MANAGERS.includes(username) ? 'manager' : 'supervisor';
     const outlet = username.split('-')[0];
 
     // Ambil nama asli dari Master List

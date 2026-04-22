@@ -39,15 +39,19 @@ export const OUTLET_NAMES: Record<OutletCode, string> = {
 
 export const MANAGERS = ['MGR-001', 'MGR-002', 'MGR-003', 'MGR-004', 'FRC-001', 'EGC-001', 'admin.media@easygoing.id'];
 export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-004', 'TSF-008', 'TSF-011', 'EGC-002'];
+export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005', 'DRK-006'];
 
 export const VALID_CREDENTIALS: Record<string, string> = {
-  'admin.media@easygoing.id': 'EGG2026',
-  'MGR-001': 'EGG2026',
-  'MGR-002': 'EGG2026',
-  'MGR-003': 'EGG2026',
-  'MGR-004': 'EGG2026',
-  'FRC-001': 'EGG2026',
-  'EGC-001': 'EGG2026',
+  // --- Admin ---
+  'admin.media@easygoing.id': 'EGG_MANAGER2026',
+  // --- Manager (password berbeda dari SPV) ---
+  'MGR-001': 'EGG_MANAGER2026',
+  'MGR-002': 'EGG_MANAGER2026',
+  'MGR-003': 'EGG_MANAGER2026',
+  'MGR-004': 'EGG_MANAGER2026',
+  'FRC-001': 'EGG_MANAGER2026',
+  'EGC-001': 'EGG_MANAGER2026',
+  // --- Supervisor ---
   'BTM-003': 'EGG2026',
   'BTM-010': 'EGG2026',
   'BTMF-001': 'EGG2026',
@@ -57,6 +61,13 @@ export const VALID_CREDENTIALS: Record<string, string> = {
   'TSF-008': 'EGG2026',
   'TSF-011': 'EGG2026',
   'EGC-002': 'EGG2026',
+  // --- Direksi ---
+  'DRK-001': 'EGG_DIREKSI2026',
+  'DRK-002': 'EGG_DIREKSI2026',
+  'DRK-003': 'EGG_DIREKSI2026',
+  'DRK-004': 'EGG_DIREKSI2026',
+  'DRK-005': 'EGG_DIREKSI2026',
+  'DRK-006': 'EGG_DIREKSI2026',
 };
 
 export const PENILAIAN_TARGETS: Record<string, string[]> = {
@@ -68,7 +79,12 @@ export const GOOGLE_SHEETS = {
   ID: process.env.GOOGLE_SHEETS_ID || 'your-sheet-id-placeholder',
   MASTER_LIST_RANGE: 'Master_List!A1:E1000',
   PENILAIAN_RANGE: 'DB_Penilaian New!A1:W1000',
-  PENILAIAN_APPEND_RANGE: 'DB_Penilaian New!A:W'
+  PENILAIAN_APPEND_RANGE: 'DB_Penilaian New!A:W',
+  // Sheet penilaian manager oleh direksi
+  PENILAIAN_MGR_RANGE: 'DB_Penilaian MGR!A1:W1000',
+  PENILAIAN_MGR_APPEND_RANGE: 'DB_Penilaian MGR!A:W',
+  // Sheet rekap manager
+  REKAP_MGR_RANGE: 'Rekap Nilai MGR!A1:Z1000',
 };
 
 // Pagination

@@ -118,12 +118,14 @@ export default function LoginPage() {
   };
 
   const getRoleLabel = (id: string) => {
+    if (id.startsWith('DRK')) return 'Direksi';
     if (id.startsWith('MGR') || id === 'admin.media@easygoing.id' || id.startsWith('FRC') || id.startsWith('EGC-001')) return 'Manager';
     return 'Supervisor';
   };
 
   const getRoleColor = (id: string) => {
-    if (id.startsWith('MGR') || id === 'admin.media@easygoing.id') 
+    if (id.startsWith('DRK')) return 'bg-[#1a1a1a] text-white';
+    if (id.startsWith('MGR') || id === 'admin.media@easygoing.id' || id.startsWith('FRC') || id.startsWith('EGC-001'))
       return 'bg-violet-100 text-violet-700';
     return 'bg-blue-100 text-blue-700';
   };
@@ -161,11 +163,10 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setDropdownOpen((v) => !v)}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 bg-white border rounded-2xl text-sm font-medium transition-all duration-200 shadow-sm text-left ${
-                      dropdownOpen
+                    className={`w-full flex items-center justify-between px-4 py-3.5 bg-white border rounded-2xl text-sm font-medium transition-all duration-200 shadow-sm text-left ${dropdownOpen
                         ? 'border-[#1a1a1a] ring-2 ring-[#1a1a1a]/10'
                         : 'border-neutral-200 hover:border-neutral-300'
-                    }`}
+                      }`}
                   >
                     {selectedUser ? (
                       <div className="flex items-center gap-3 min-w-0">
@@ -219,9 +220,8 @@ export default function LoginPage() {
                               key={emp.id}
                               type="button"
                               onClick={() => handleSelectUser(emp)}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-neutral-50 transition-colors ${
-                                selectedUser?.id === emp.id ? 'bg-neutral-50' : ''
-                              }`}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-neutral-50 transition-colors ${selectedUser?.id === emp.id ? 'bg-neutral-50' : ''
+                                }`}
                             >
                               <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
                                 <span className="font-bold text-neutral-600 text-sm">{emp.name.charAt(0)}</span>

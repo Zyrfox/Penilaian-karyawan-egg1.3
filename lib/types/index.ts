@@ -1,4 +1,5 @@
-export type UserRole = 'manager' | 'supervisor' | 'public';
+export type UserRole = 'manager' | 'supervisor' | 'direksi' | 'public';
+export type ManagerDivision = 'SDM' | 'Keuangan' | 'Inventory' | 'Komersial' | 'Lainnya';
 
 export interface User {
   id: string;

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, CheckSquare, Trophy, Settings, LogOut, Building2 } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Trophy, LogOut, Building2, Briefcase, BarChart3 } from 'lucide-react';
 import { User as UserType } from '@/lib/types';
 
 interface SidebarProps {
@@ -22,9 +22,12 @@ export function Sidebar({ currentUser }: SidebarProps) {
 
   const navItems = [
     { name: 'Dashboard', path: '/penilaian', icon: LayoutDashboard },
-    { name: 'Rekap Nilai', path: '/rekapan', icon: CheckSquare, restrictedTo: ['manager'] },
+    { name: 'Rekap Nilai', path: '/rekapan', icon: CheckSquare, restrictedTo: ['manager', 'direksi'] },
     { name: 'Leaderboard', path: '/leaderboard', icon: Trophy },
+    { name: 'Nilai Manager', path: '/penilaian-manager', icon: Briefcase, restrictedTo: ['direksi'] },
+    { name: 'Rekap Manager', path: '/rekap-manager', icon: BarChart3, restrictedTo: ['direksi'] },
   ];
+
 
   return (
     <aside className="w-full md:w-64 flex-shrink-0 flex md:flex-col bg-white md:rounded-[2rem] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:h-full overflow-x-auto md:overflow-hidden border border-neutral-100 mb-4 md:mb-0 transition-all">

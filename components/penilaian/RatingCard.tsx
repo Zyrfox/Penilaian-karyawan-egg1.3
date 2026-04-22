@@ -51,7 +51,7 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
   const config = value && GRADE_CONFIG[value] ? GRADE_CONFIG[value] : null;
 
   return (
-    <div className="relative min-w-[200px]">
+    <div className="relative w-full sm:min-w-[180px]">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as RatingGrade)}
@@ -157,18 +157,18 @@ export function RatingCard({
     >
       {/* Card Header */}
       <div
-        className={`px-5 py-4 cursor-pointer flex justify-between items-center transition-colors ${
+        className={`px-4 sm:px-5 py-3 sm:py-4 cursor-pointer flex justify-between items-center transition-colors ${
           isExpanded ? 'bg-[#f8fafc]' : 'bg-white hover:bg-neutral-50'
         }`}
         onClick={() => onToggleExpand(employee.id)}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
             <span className="font-extrabold text-neutral-600 text-sm">{employee.name.charAt(0)}</span>
           </div>
-          <div className="min-w-0">
-            <h3 className="font-extrabold text-[#1a1a1a] text-base truncate">{employee.name}</h3>
-            <p className="text-xs text-neutral-500">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-extrabold text-[#1a1a1a] text-sm sm:text-base leading-snug" style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>{employee.name}</h3>
+            <p className="text-xs text-neutral-500 truncate">
               {employee.outlet} – {employee.position}
               {isLocked && (
                 <span className="ml-2 inline-flex items-center gap-1 text-amber-600 font-semibold">
@@ -180,7 +180,7 @@ export function RatingCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 ml-2">
           {rawAvg > 0 && (
             <div className="text-right hidden sm:block">
               <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Rata-rata</div>
@@ -189,7 +189,7 @@ export function RatingCard({
               </div>
             </div>
           )}
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-200 ${isExpanded ? 'bg-neutral-900 text-white rotate-180' : 'bg-neutral-100 text-neutral-500'}`}>
+          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform duration-200 ${isExpanded ? 'bg-neutral-900 text-white rotate-180' : 'bg-neutral-100 text-neutral-500'}`}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
@@ -222,7 +222,7 @@ export function RatingCard({
                     {cats.map((cat) => (
                       <div
                         key={cat.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                        className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
                       >
                         <label className="text-sm font-semibold text-neutral-700 flex-1">
                           {cat.label}
