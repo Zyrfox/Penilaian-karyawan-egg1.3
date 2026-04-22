@@ -78,7 +78,7 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
         {/* Placeholder: hanya tampil saat belum ada pilihan, tidak muncul di daftar dropdown */}
         <option value="" disabled hidden className="text-neutral-400 bg-white font-normal">Pilih Nilai</option>
         {/* Opsi reset: hanya muncul di dropdown saat sudah ada nilai dipilih */}
-        {value && value !== '-' && (
+        {value && (value as string) !== '-' && (
           <option value="__RESET__" className="text-neutral-400 bg-white font-normal italic">— Batalkan Pilihan</option>
         )}
         {GRADE_OPTIONS.map((opt) => (
