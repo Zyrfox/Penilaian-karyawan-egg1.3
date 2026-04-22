@@ -165,19 +165,9 @@ export default function RekapanPage() {
         <div className="p-4 sm:p-6 md:p-10 flex flex-col relative z-10">
 
           {/* Header */}
-          <div className="mb-5 md:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-1">Rekapan Nilai Karyawan</h1>
-              <p className="text-xs sm:text-sm text-neutral-500 font-medium">Lihat dan ekspor hasil penilaian karyawan dari semua penilai.</p>
-            </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-neutral-200 rounded-xl text-xs sm:text-sm font-bold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all">
-                Ekspor CSV
-              </button>
-              <button className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-neutral-200 rounded-xl text-xs sm:text-sm font-bold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all">
-                Ekspor PDF
-              </button>
-            </div>
+          <div className="mb-5 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-1">Rekapan Nilai Karyawan</h1>
+            <p className="text-xs sm:text-sm text-neutral-500 font-medium">Lihat hasil penilaian karyawan dari semua penilai.</p>
           </div>
 
           {/* Date Filter */}
