@@ -41,6 +41,22 @@ export const MANAGERS = ['MGR-001', 'MGR-002', 'MGR-003', 'MGR-004', 'FRC-001', 
 export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-004', 'TSF-008', 'TSF-011', 'EGC-002'];
 export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005', 'DRK-006'];
 
+/**
+ * Penilai Khusus: karyawan yang kedudukannya setara SPV (bisa login & menilai)
+ * meskipun posisi di Master List bukan "SPV".
+ * Tambahkan ID karyawan di sini jika perlu akses sebagai penilai.
+ */
+export const PENILAI_KHUSUS: string[] = [
+  // Contoh: 'TSF-XXX', // Irfan Hilmi — tambahkan ID-nya di sini
+];
+
+/** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat */
+export const ROLE_PASSWORDS = {
+  supervisor: 'EGG2026',
+  manager:    'EGG_MANAGER2026',
+  direksi:    'EGG_DIREKSI2026',
+} as const;
+
 export const VALID_CREDENTIALS: Record<string, string> = {
   // --- Admin ---
   'admin.media@easygoing.id': 'EGG_MANAGER2026',

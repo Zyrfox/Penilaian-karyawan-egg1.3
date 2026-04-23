@@ -1,7 +1,6 @@
-import { validateLoginCredentials } from '@/lib/utils/validators';
-import { VALID_CREDENTIALS, MANAGERS, DIRECTORS } from '@/lib/utils/constants';
-import { signToken } from '@/lib/api/auth';
 import { getMasterList } from '@/lib/api/sheets';
+import { MANAGERS, SUPERVISORS, DIRECTORS, PENILAI_KHUSUS, ROLE_PASSWORDS } from '@/lib/utils/constants';
+import { signToken } from '@/lib/api/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { User, UserRole } from '@/lib/types';
 
@@ -10,30 +9,71 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { username, password } = body;
 
-    const validationErrors = validateLoginCredentials(username, password);
-    if (validationErrors.length > 0) {
+    if (!username?.trim() || !password?.trim()) {
       return NextResponse.json(
-        { success: false, message: validationErrors[0].message },
+        { success: false, message: 'Username dan password tidak boleh kosong' },
         { status: 401 }
       );
     }
 
-    const role: UserRole = DIRECTORS.includes(username) ? 'direksi' : MANAGERS.includes(username) ? 'manager' : 'supervisor';
-    const outlet = username.split('-')[0];
-
-    // Ambil nama asli dari Master List
-    let displayName = username;
-    let displayPosition = '';
+    // ── 1. Ambil data dari Master List (Google Sheets) ──────────────────────
+    let masterList: any[] = [];
     try {
-      const masterList = await getMasterList();
-      const empData = masterList.find((e: any) => e.id === username);
-      if (empData) {
-        displayName = empData.name;
-        displayPosition = empData.position;
-      }
+      masterList = await getMasterList();
     } catch {
-      // Jika gagal, fallback ke username
+      // Jika sheets tidak bisa diakses, fallback ke mode terbatas
     }
+
+    const empData = masterList.find((e: any) => e.id === username);
+
+    // ── 2. Tentukan role berdasarkan prioritas ──────────────────────────────
+    let role: UserRole | null = null;
+    let expectedPassword = '';
+
+    if (DIRECTORS.includes(username)) {
+      // Direksi: hardcoded list
+      role = 'direksi';
+      expectedPassword = ROLE_PASSWORDS.direksi;
+
+    } else if (MANAGERS.includes(username)) {
+      // Manager: hardcoded list
+      role = 'manager';
+      expectedPassword = ROLE_PASSWORDS.manager;
+
+    } else if (SUPERVISORS.includes(username)) {
+      // SPV: hardcoded (legacy fallback)
+      role = 'supervisor';
+      expectedPassword = ROLE_PASSWORDS.supervisor;
+
+    } else if (empData && empData.position && empData.position.toUpperCase().includes('SPV')) {
+      // ✅ DINAMIS: posisi di sheet mengandung kata "SPV" → otomatis jadi supervisor
+      role = 'supervisor';
+      expectedPassword = ROLE_PASSWORDS.supervisor;
+
+    } else if (PENILAI_KHUSUS.includes(username)) {
+      // Penilai khusus: non-SPV tapi kedudukannya setara (misal Irfan Hilmi)
+      role = 'supervisor';
+      expectedPassword = ROLE_PASSWORDS.supervisor;
+
+    } else {
+      return NextResponse.json(
+        { success: false, message: 'Username tidak ditemukan atau tidak memiliki akses' },
+        { status: 401 }
+      );
+    }
+
+    // ── 3. Validasi password ────────────────────────────────────────────────
+    if (password !== expectedPassword) {
+      return NextResponse.json(
+        { success: false, message: 'Password salah' },
+        { status: 401 }
+      );
+    }
+
+    // ── 4. Buat token & response ────────────────────────────────────────────
+    const displayName = empData?.name || username;
+    const displayPosition = empData?.position || '';
+    const outlet = empData?.outlet || username.split('-')[0];
 
     const user: User = {
       id: username,
@@ -64,7 +104,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24, // 24 jam
     });
 
     return response;
@@ -76,3 +116,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
