@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { RatingCategory, RatingGrade, RATING_SCALE } from '@/lib/types';
 import { RATING_CATEGORIES } from '@/lib/utils/constants';
+import { calculateScoreWithBonus } from '@/lib/utils/calculations';
 
 interface RatingCardProps {
   employee: any;
@@ -143,17 +144,8 @@ export function RatingCard({
     onSaveDraft(employee.id, ratings as Record<RatingCategory, RatingGrade>);
   };
 
-  // Calculate live average
-  const values = Object.entries(ratings)
-    .filter(([id, val]) => {
-      const isReq =
-        RATING_CATEGORIES.find((c) => c.id === id)?.required ||
-        (isRamadan && ['sholat', 'puasa'].includes(id));
-      return isReq && val !== '' && (val as string) !== '-';
-    })
-    .map(([, val]) => RATING_SCALE[val as RatingGrade] || 0);
-
-  const rawAvg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+  // Calculate live average — bonus-only untuk kriteria opsional
+  const rawAvg = calculateScoreWithBonus(ratings as Record<string, string>, isRamadan);
   const gradeMap: any = { 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'E' };
   const avgGrade = gradeMap[Math.round(rawAvg)] || '-';
   const avgColor = getAvgGradeColor(rawAvg);

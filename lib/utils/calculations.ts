@@ -34,6 +34,60 @@ export function calculateAverageScore(
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
+/**
+ * Perhitungan score dengan logika bonus-only untuk kriteria opsional (Ibadah).
+ *
+ * - Kriteria WAJIB: selalu ikut rata-rata jika diisi
+ * - Kriteria OPSIONAL (Ibadah) di luar Ramadan:
+ *     • Jika TIDAK diisi → tidak berpengaruh sama sekali
+ *     • Jika DIISI dan nilainya ≥ rata-rata wajib → masuk sebagai bonus (menaikkan score)
+ *     • Jika DIISI dan nilainya < rata-rata wajib → diabaikan (tidak menurunkan score)
+ * - Pada periode Ramadan, Ibadah diperlakukan sebagai wajib (ikut rata-rata biasa)
+ */
+export function calculateScoreWithBonus(
+  ratings: Record<string, string>,
+  isRamadanPeriod: boolean
+): number {
+  // 1. Hitung rata-rata dari kriteria WAJIB saja
+  const requiredValues = Object.entries(ratings)
+    .filter(([id, val]) => {
+      if (!val || val === '' || val === '-') return false;
+      const cat = RATING_CATEGORIES.find(c => c.id === id);
+      if (!cat) return false;
+      // Saat Ramadan, IBADAH juga wajib
+      if (isRamadanPeriod) return true;
+      return cat.required;
+    })
+    .map(([, val]) => RATING_SCALE[val as RatingGrade] || 0);
+
+  if (requiredValues.length === 0) return 0;
+  const requiredAvg = requiredValues.reduce((a, b) => a + b, 0) / requiredValues.length;
+
+  // 2. Jika bukan Ramadan, cek kriteria opsional sebagai bonus
+  if (!isRamadanPeriod) {
+    const optionalIds = RATING_CATEGORIES
+      .filter(c => !c.required)
+      .map(c => c.id);
+
+    const bonusValues = optionalIds
+      .map(id => {
+        const val = ratings[id];
+        if (!val || val === '' || val === '-') return null; // tidak diisi → skip
+        const point = RATING_SCALE[val as RatingGrade] || 0;
+        return point >= requiredAvg ? point : null; // hanya jika ≥ rata-rata wajib
+      })
+      .filter((v): v is number => v !== null);
+
+    if (bonusValues.length > 0) {
+      // Gabungkan: semua required + optional yang lolos sebagai bonus
+      const allValues = [...requiredValues, ...bonusValues];
+      return allValues.reduce((a, b) => a + b, 0) / allValues.length;
+    }
+  }
+
+  return requiredAvg;
+}
+
 export function calculateTotalPoints(
   ratings: Record<RatingCategory, RatingGrade>,
   isRamadan: boolean = false

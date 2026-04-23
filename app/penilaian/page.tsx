@@ -6,24 +6,10 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { RatingCard } from '@/components/penilaian/RatingCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { canUserRate } from '@/lib/utils/validators';
-import { isRamadan } from '@/lib/utils/calculations';
+import { isRamadan, calculateScoreWithBonus } from '@/lib/utils/calculations';
 import { RATING_CATEGORIES } from '@/lib/utils/constants';
 import { RatingCategory, RatingGrade, RATING_SCALE } from '@/lib/types';
 
-function calculateTotalPoint(ratings: Record<string, string>, isRamadanPeriod: boolean): number {
-  const values = Object.entries(ratings)
-    .filter(([id, val]) => {
-      if (!val || val === '' || val === '-') return false;
-      const cat = RATING_CATEGORIES.find((c) => c.id === id);
-      if (!cat) return false;
-      if (cat.section === 'IBADAH') return isRamadanPeriod;
-      return true;
-    })
-    .map(([, val]) => RATING_SCALE[val as RatingGrade] || 0);
-
-  if (values.length === 0) return 0;
-  return values.reduce((a, b) => a + b, 0) / values.length;
-}
 
 function getPredikat(avg: number): string {
   const rounded = Math.round(avg);
@@ -265,7 +251,7 @@ export default function PenilaianPage() {
         }
 
         const empInfo = employeeMap[emp.id] || emp;
-        const avg = calculateTotalPoint(ratings, ramadan);
+        const avg = calculateScoreWithBonus(ratings, ramadan);
         const predikat = getPredikat(avg);
 
         // Build the row as per sheet schema (columns A-W)
