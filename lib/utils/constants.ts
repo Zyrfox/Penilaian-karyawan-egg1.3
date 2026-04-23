@@ -47,7 +47,7 @@ export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005',
  * Tambahkan ID karyawan di sini jika perlu akses sebagai penilai.
  */
 export const PENILAI_KHUSUS: string[] = [
-  // Contoh: 'TSF-XXX', // Irfan Hilmi — tambahkan ID-nya di sini
+  'BTM-001', // Mochammad Irfan Hilmi — Kepala Media & Informasi (setara SPV)
 ];
 
 /** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat */
