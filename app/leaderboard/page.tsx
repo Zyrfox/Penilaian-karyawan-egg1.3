@@ -271,7 +271,7 @@ function LeaderboardContent() {
       <main className="flex-1 overflow-y-auto bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none" />
 
-        <div className="p-4 sm:p-8 md:p-12 h-full flex flex-col relative z-10">
+        <div className="p-4 sm:p-8 md:p-12 min-h-full flex flex-col relative z-10 pb-20 md:pb-12">
 
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -346,7 +346,7 @@ function LeaderboardContent() {
               <LoadingSpinner />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden flex-1 flex flex-col">
+            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
               {leaderboardData.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-20 px-8 text-center">
                   <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mb-5 text-4xl">🏆</div>
