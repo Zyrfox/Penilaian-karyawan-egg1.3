@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, Lock, ChevronDown, Search, User, Eye, EyeOff } from 'lucide-react';
-import { VALID_CREDENTIALS } from '@/lib/utils/constants';
+import { VALID_CREDENTIALS, MANAGERS, SUPERVISORS, DIRECTORS, PENILAI_KHUSUS } from '@/lib/utils/constants';
 
 interface EmployeeOption {
   id: string;
@@ -31,9 +31,19 @@ export default function LoginPage() {
         const res = await fetch('/api/sheets/master-list');
         const data = await res.json();
         if (data.success && data.data) {
-          const validUsers: EmployeeOption[] = data.data.filter((emp: any) =>
-            Object.keys(VALID_CREDENTIALS).includes(emp.id)
-          );
+          // Tampilkan semua user yang berhak login (konsisten dengan logika login route)
+          const validUsers: EmployeeOption[] = data.data.filter((emp: any) => {
+            const id: string = emp.id;
+            const position: string = emp.position || '';
+            return (
+              DIRECTORS.includes(id) ||
+              MANAGERS.includes(id) ||
+              SUPERVISORS.includes(id) ||
+              PENILAI_KHUSUS.includes(id) ||
+              position.toUpperCase().includes('SPV') ||
+              Object.keys(VALID_CREDENTIALS).includes(id) // legacy fallback
+            );
+          });
 
           if (!validUsers.find((u) => u.id === 'admin.media@easygoing.id')) {
             validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTM' });
