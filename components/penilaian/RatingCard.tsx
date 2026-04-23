@@ -67,7 +67,7 @@ function GradeSelect({ value, onChange, disabled, includeEmpty }: GradeSelectPro
         onChange={handleChange}
         disabled={disabled}
         className={`
-          w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl text-sm font-bold
+          w-full appearance-none pl-2.5 sm:pl-4 pr-8 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold
           border-2 focus:outline-none cursor-pointer transition-all duration-150
           disabled:opacity-60 disabled:cursor-not-allowed
           ${config
@@ -205,7 +205,7 @@ export function RatingCard({
 
       {/* Expanded Body */}
       {isExpanded && (
-        <div className="bg-white border-t border-neutral-100 p-5">
+        <div className="bg-white border-t border-neutral-100 p-3 sm:p-5">
           {isLocked && (
             <div className="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
@@ -216,25 +216,25 @@ export function RatingCard({
             </div>
           )}
 
-          <div className="space-y-7">
+          <div className="space-y-5 sm:space-y-7">
             {sections.map((section) => {
               const cats = RATING_CATEGORIES.filter((c) => c.section === section);
               return (
                 <div key={section}>
-                  <h4 className={`text-xs font-extrabold uppercase tracking-widest mb-3 ${SECTION_COLORS[section]}`}>
+                  <h4 className={`text-[10px] sm:text-xs font-extrabold uppercase tracking-widest mb-2 sm:mb-3 ${SECTION_COLORS[section]}`}>
                     {SECTION_LABELS[section]}
                   </h4>
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {cats.map((cat) => (
                       <div
                         key={cat.id}
-                        className="grid items-center gap-3"
-                        style={{ gridTemplateColumns: '1fr 210px' }}
+                        className="grid items-center gap-2 sm:gap-3"
+                        style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(120px, 45%)' }}
                       >
-                        <label className="text-sm font-semibold text-neutral-700 leading-snug">
+                        <label className="text-xs sm:text-sm font-semibold text-neutral-700 leading-snug">
                           {cat.label}
                           {section === 'IBADAH' && !isRamadan && (
-                            <span className="ml-2 text-neutral-400 font-normal text-xs">(Opsional)</span>
+                            <span className="ml-1 text-neutral-400 font-normal text-[10px]">(Opsional)</span>
                           )}
                         </label>
                         <GradeSelect
@@ -262,13 +262,13 @@ export function RatingCard({
           )}
 
           {!isLocked && (
-            <div className="mt-5 pt-4 border-t border-neutral-100 flex justify-end gap-3">
+            <div className="mt-3 sm:mt-5 pt-3 sm:pt-4 border-t border-neutral-100 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={handleSaveDraftClick}
-                className="px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-sm font-bold transition-all"
+                className="px-3 py-2 sm:px-5 sm:py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs sm:text-sm font-bold transition-all"
               >
-                💾 Simpan Draft Lokal
+                💾 Simpan Draft
               </button>
             </div>
           )}

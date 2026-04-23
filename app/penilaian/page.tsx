@@ -331,7 +331,7 @@ export default function PenilaianPage() {
   }
 
   return (
-    <div className="h-screen bg-[#e8ecf1] flex flex-col md:flex-row p-4 sm:p-6 gap-4 md:gap-6 font-sans overflow-hidden">
+    <div className="h-screen bg-[#e8ecf1] flex flex-col md:flex-row p-2 sm:p-4 md:p-6 gap-2 sm:gap-4 md:gap-6 font-sans overflow-hidden">
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
@@ -349,11 +349,11 @@ export default function PenilaianPage() {
       <main className="flex-1 overflow-y-auto bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none" />
 
-        <div className="p-8 sm:p-12 h-full flex flex-col">
-          <div className="mb-8 flex justify-between items-end relative z-10">
+        <div className="p-4 sm:p-8 md:p-12 h-full flex flex-col">
+          <div className="mb-4 sm:mb-8 flex justify-between items-end relative z-10">
             <div>
-              <h2 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2">Penilaian Karyawan</h2>
-              <p className="text-sm text-neutral-500 font-medium">Beri penilaian kinerja bulanan secara objektif dan akurat.</p>
+              <h2 className="text-xl sm:text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-1 sm:mb-2">Penilaian Karyawan</h2>
+              <p className="text-xs sm:text-sm text-neutral-500 font-medium">Beri penilaian kinerja bulanan secara objektif dan akurat.</p>
             </div>
             {draftCount > 0 && (
               <div className="hidden sm:flex items-center gap-2 bg-blue-50 border border-blue-200 px-4 py-2 rounded-xl text-sm font-bold text-blue-700">
@@ -387,19 +387,19 @@ export default function PenilaianPage() {
           </div>
 
           {employees.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-neutral-200/50 flex justify-between items-center relative z-10 gap-4">
+            <div className="mt-3 sm:mt-6 pt-3 sm:pt-6 border-t border-neutral-200/50 flex justify-between items-center relative z-10 gap-2 sm:gap-4">
               <button
                 onClick={handleResetAll}
-                className="px-5 py-2.5 text-sm font-bold text-red-600 bg-white hover:bg-red-50 border border-red-100 rounded-xl transition-all shadow-sm"
+                className="px-3 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-red-600 bg-white hover:bg-red-50 border border-red-100 rounded-xl transition-all shadow-sm whitespace-nowrap"
               >
-                Reset Semua Draft
+                Reset Draft
               </button>
               <button
                 onClick={handleSubmitAll}
                 disabled={draftCount === 0}
-                className="px-6 py-3 text-sm font-bold text-white bg-[#1a1a1a] hover:bg-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
+                className="flex-1 sm:flex-none px-3 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm font-bold text-white bg-[#1a1a1a] hover:bg-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
               >
-                {draftCount > 0 ? `Simpan ${draftCount} Penilaian ke Server` : 'Simpan & Submit ke Server'}
+                {draftCount > 0 ? `Simpan ${draftCount} Penilaian` : 'Simpan & Submit'}
               </button>
             </div>
           )}
