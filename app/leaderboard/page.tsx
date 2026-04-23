@@ -265,18 +265,18 @@ function LeaderboardContent() {
   };
 
   return (
-    <div className="h-screen bg-[#e8ecf1] flex flex-col md:flex-row p-4 sm:p-6 gap-4 md:gap-6 font-sans overflow-hidden">
+    <div className="h-screen bg-[#e8ecf1] flex flex-col md:flex-row p-2 sm:p-4 md:p-6 gap-2 sm:gap-4 md:gap-6 font-sans overflow-hidden">
       <Sidebar currentUser={null} />
 
       <main className="flex-1 overflow-y-auto bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none" />
 
-        <div className="p-8 sm:p-12 h-full flex flex-col relative z-10">
+        <div className="p-4 sm:p-8 md:p-12 h-full flex flex-col relative z-10">
 
           {/* Header */}
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2">Leaderboard Karyawan</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2">Leaderboard Karyawan</h1>
               <p className="text-sm text-neutral-500 font-medium">Rata-rata penilaian karyawan dari semua penilai periode ini</p>
             </div>
             {/* Share Button */}
@@ -286,7 +286,7 @@ function LeaderboardContent() {
           </div>
 
           {/* Date Filter */}
-          <div className="mb-6 bg-white rounded-2xl border border-neutral-100 shadow-sm p-4">
+          <div className="mb-4 sm:mb-6 bg-white rounded-2xl border border-neutral-100 shadow-sm p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4 text-neutral-500" />
               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Filter Periode</span>
@@ -297,7 +297,7 @@ function LeaderboardContent() {
                 <button
                   key={r.label}
                   onClick={() => handleQuickRange(r)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all ${
                     activeQuick === r.label
                       ? 'bg-[#1a1a1a] text-white shadow-md'
                       : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
@@ -309,27 +309,27 @@ function LeaderboardContent() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <label className="text-xs font-bold text-neutral-500 block mb-1">Dari Tanggal</label>
                 <input
                   type="date"
                   value={dateRange.start}
                   onChange={(e) => { setDateRange((p) => ({ ...p, start: e.target.value })); setActiveQuick('Custom'); }}
-                  className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/20 bg-white"
+                  className="w-full px-3 py-2 sm:py-2.5 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/20 bg-white"
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <label className="text-xs font-bold text-neutral-500 block mb-1">Sampai Tanggal</label>
                 <input
                   type="date"
                   value={dateRange.end}
                   onChange={(e) => { setDateRange((p) => ({ ...p, end: e.target.value })); setActiveQuick('Custom'); }}
-                  className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/20 bg-white"
+                  className="w-full px-3 py-2 sm:py-2.5 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/20 bg-white"
                 />
               </div>
               <button
                 onClick={handleCustomRange}
-                className="px-5 py-2.5 bg-[#1a1a1a] text-white text-sm font-bold rounded-xl hover:bg-black transition-all shadow-sm"
+                className="w-full sm:w-auto px-5 py-2 sm:py-2.5 bg-[#1a1a1a] text-white text-sm font-bold rounded-xl hover:bg-black transition-all shadow-sm"
               >
                 Terapkan
               </button>
@@ -361,13 +361,13 @@ function LeaderboardContent() {
                   <table className="w-full text-left whitespace-nowrap">
                     <thead className="bg-[#f8fafc] border-b border-neutral-100">
                       <tr>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs w-20 text-center">Rank</th>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs">Nama Karyawan</th>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">Posisi</th>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Outlet</th>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Score</th>
-                         <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center hidden md:table-cell">Penilai</th>
-                        <th className="px-6 py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Predikat</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs w-16 sm:w-20 text-center">Rank</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs">Nama Karyawan</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">Posisi</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Outlet</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Score</th>
+                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center hidden md:table-cell">Penilai</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Predikat</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100">
@@ -376,30 +376,30 @@ function LeaderboardContent() {
                           key={row.employeeId}
                           className={`hover:brightness-[0.97] transition-all ${RANK_STYLE[row.rank] || 'bg-white'}`}
                         >
-                          <td className="px-6 py-5 text-center font-bold text-2xl">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-center font-bold text-xl sm:text-2xl">
                             {getRankMedal(row.rank)}
                           </td>
-                          <td className="px-6 py-5">
-                            <div className="font-extrabold text-[#1a1a1a] text-base">{row.employeeName}</div>
+                          <td className="px-3 sm:px-6 py-3 sm:py-5">
+                            <div className="font-extrabold text-[#1a1a1a] text-sm sm:text-base">{row.employeeName}</div>
                             <div className="md:hidden text-xs font-semibold text-neutral-400 mt-0.5">{row.position}</div>
                           </td>
-                          <td className="px-6 py-5 text-neutral-500 font-medium hidden md:table-cell">{row.position}</td>
-                          <td className="px-6 py-5 text-center">
-                            <span className="px-3.5 py-1.5 bg-[#f1f5f9] text-neutral-700 rounded-xl text-xs font-bold border border-neutral-200">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-neutral-500 font-medium hidden md:table-cell">{row.position}</td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-center">
+                            <span className="px-2 sm:px-3.5 py-1 sm:py-1.5 bg-[#f1f5f9] text-neutral-700 rounded-xl text-[10px] sm:text-xs font-bold border border-neutral-200">
                               {row.outlet}
                             </span>
                           </td>
-                          <td className="px-6 py-5 text-center">
-                            <div className={`font-extrabold text-xl ${getScoreColor(row.normalizedScore)}`}>
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-center">
+                            <div className={`font-extrabold text-lg sm:text-xl ${getScoreColor(row.normalizedScore)}`}>
                               {row.normalizedScore.toFixed(2)}
                             </div>
                           </td>
-                          <td className="px-6 py-5 text-center hidden md:table-cell">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-center hidden md:table-cell">
                             <span className="text-xs font-bold text-neutral-500">
                               {row.ratingCount} <span className="font-normal text-neutral-400">orang</span>
                             </span>
                           </td>
-                          <td className="px-6 py-5 text-center">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 text-center">
                             {(() => {
                               const grade = getPredikat(row.normalizedScore);
                               return (
