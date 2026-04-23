@@ -64,6 +64,7 @@ export async function getPenilaianData(startDate?: string, endDate?: string) {
       tanggal: row[0],
       namaPenilai: row[1]?.split('_')[0] || row[1],
       karyawanDinilai: row[2]?.split('_')[0] || row[2],
+      karyawanDinilaiRaw: row[2] || '',
       posisi: row[3],
       outlet: row[4],
       status: row[5],
@@ -132,6 +133,7 @@ export async function getManagerRatings(startDate?: string, endDate?: string) {
       tanggal: row[0] || '',
       namaPenilai: row[1] || '',
       managerDinilai: row[2] || '',
+      managerDinilaiRaw: row[2] || '',
       divisi: row[3] || '',
       // General (E–H = index 4–7)
       mngr_kepemimpinan: row[4] || '',

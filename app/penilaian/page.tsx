@@ -173,7 +173,12 @@ export default function PenilaianPage() {
           if (row.namaPenilai === activeUser.id) {
             const d = new Date(row.tanggal);
             if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) {
-              ratedSet.add(row.karyawanDinilai);
+              if (row.karyawanDinilai && row.karyawanDinilai.trim() !== '') {
+                ratedSet.add(row.karyawanDinilai);
+              }
+              if (row.karyawanDinilaiRaw && row.karyawanDinilaiRaw.trim() !== '') {
+                ratedSet.add(row.karyawanDinilaiRaw);
+              }
             }
           }
         });
@@ -246,7 +251,8 @@ export default function PenilaianPage() {
         }
 
         // Check duplicate (already rated this month)
-        if (alreadyRatedIds.has(emp.id)) {
+        const exactMatchRaw = `${emp.id}_${emp.name}`;
+        if ((emp.id && alreadyRatedIds.has(emp.id)) || alreadyRatedIds.has(exactMatchRaw)) {
           continue; // skip already-rated employees
         }
 
@@ -376,7 +382,7 @@ export default function PenilaianPage() {
                   key={emp.id}
                   employee={emp}
                   isExpanded={expandedId === emp.id}
-                  isLocked={alreadyRatedIds.has(emp.id)}
+                  isLocked={(emp.id && alreadyRatedIds.has(emp.id)) || alreadyRatedIds.has(`${emp.id}_${emp.name}`)}
                   isRamadan={ramadan}
                   draftRatings={drafts[emp.id] || null}
                   onToggleExpand={(id) => setExpandedId(expandedId === id ? null : id)}
