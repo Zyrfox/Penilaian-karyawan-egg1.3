@@ -141,7 +141,7 @@ export default function PenilaianPage() {
 
       if (dataMaster.success) {
         let rateable = dataMaster.data.filter((emp: any) =>
-          canUserRate(activeUser.role, activeUser.outlet, activeUser.id, emp.id, emp.outlet).canRate
+          canUserRate(activeUser.role, activeUser.outlet, activeUser.id, emp.id, emp.outlet, emp.position).canRate
         );
         rateable = rateable.filter((v: any, i: number, self: any[]) =>
           i === self.findIndex((t) => t.id === v.id)

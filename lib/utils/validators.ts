@@ -1,5 +1,5 @@
 import { RatingGrade, RatingCategory, Employee, EmployeeStatus, OutletCode } from '@/lib/types';
-import { RATING_CATEGORIES, VALID_CREDENTIALS, MANAGERS, SUPERVISORS, VALID_OUTLETS } from './constants';
+import { RATING_CATEGORIES, VALID_CREDENTIALS, MANAGERS, SUPERVISORS, VALID_OUTLETS, PENILAI_KHUSUS } from './constants';
 
 export interface ValidationError {
   field: string;
@@ -108,15 +108,22 @@ export function canUserRate(
     return { canRate: false, reason: 'Manager hanya bisa menilai outlet BTM, BTMF, TSF' };
   }
 
-  // Supervisor can only rate people in their outlet
+  // Supervisor can only rate people in their outlet (BTM and BTMF are considered the same scope)
   if (raterRole === 'supervisor') {
-    if (raterOutlet === rateeOutlet) {
+    const isBTMGroup = ['BTM', 'BTMF'].includes(raterOutlet) && ['BTM', 'BTMF'].includes(rateeOutlet);
+    const isSameOutlet = raterOutlet === rateeOutlet;
+
+    if (isSameOutlet || isBTMGroup) {
       // Cannot rate themselves or other supervisors
-      if (!SUPERVISORS.includes(rateeEmployeeId) && raterEmployeeId !== rateeEmployeeId) {
+      const isRateeSPV = SUPERVISORS.includes(rateeEmployeeId) || 
+                         PENILAI_KHUSUS.includes(rateeEmployeeId) || 
+                         (rateeRole && rateeRole.toUpperCase().includes('SPV'));
+                         
+      if (!isRateeSPV && raterEmployeeId !== rateeEmployeeId) {
         return { canRate: true };
       }
     }
-    return { canRate: false, reason: 'Supervisor hanya bisa menilai outlet mereka sendiri' };
+    return { canRate: false, reason: 'Supervisor hanya bisa menilai outlet mereka sendiri (BTM & BTMF digabung)' };
   }
 
   return { canRate: false, reason: 'Role tidak dikenali' };
