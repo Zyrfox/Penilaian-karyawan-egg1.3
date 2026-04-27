@@ -200,6 +200,34 @@ function ManagerCard({
             </div>
           )}
 
+          {/* Quick Accumulation Grade Buttons */}
+          {!isLocked && (
+            <div className="mb-6 bg-blue-50/50 p-3 sm:p-4 rounded-xl border border-blue-100">
+               <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                 <div>
+                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 block">Isi Cepat (Otomatis)</label>
+                   <span className="text-xs text-neutral-500 font-medium">Pilih nilai akhir untuk mengisi semua kriteria secara otomatis.</span>
+                 </div>
+                 <div className="flex gap-2 w-full sm:w-auto">
+                   {GRADE_OPTIONS.map((g) => (
+                     <button
+                       key={g}
+                       onClick={() => {
+                          const newGrades = { ...grades };
+                          questions.forEach(q => { newGrades[q.id] = g as RatingGrade; });
+                          setGrades(newGrades);
+                       }}
+                       title={`Isi semua dengan ${g}`}
+                       className={`flex-1 sm:w-10 sm:h-10 sm:flex-none py-2 sm:py-0 flex items-center justify-center text-sm font-bold rounded-lg border transition-all shadow-sm ${getGradeStyle(g)} hover:scale-105 active:scale-95 hover:shadow`}
+                     >
+                       {g}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+            </div>
+          )}
+
           {/* General Questions */}
           <div className="mb-6">
             <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-violet-600 mb-3">Pertanyaan General</h4>
