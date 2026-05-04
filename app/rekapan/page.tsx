@@ -30,8 +30,9 @@ function getScoreColor(score: number): string {
 
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { groupByEmployeeForRecap } from '@/lib/utils/transformers';
+import { exportRecapToCsv, exportRecapToXlsx } from '@/lib/utils/export';
 import { Employee, RatingRecord, RecapRow } from '@/lib/types';
-import { Calendar, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { Calendar, ChevronDown, ChevronUp, Users, FileDown } from 'lucide-react';
 
 function getDefaultDateRange() {
   const now = new Date();
@@ -76,6 +77,7 @@ export default function RekapanPage() {
   const [recapData, setRecapData] = useState<RecapRow[]>([]);
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [activeQuick, setActiveQuick] = useState('Bulan Ini');
+  const [exporting, setExporting] = useState<'csv' | 'xlsx' | null>(null);
 
   useEffect(() => {
     async function initAuth() {
@@ -103,9 +105,10 @@ export default function RekapanPage() {
   const loadData = async (start: string, end: string) => {
     setLoading(true);
     try {
+      const ts = Date.now();
       const [resMaster, resPenilaian] = await Promise.all([
-        fetch('/api/sheets/master-list'),
-        fetch(`/api/sheets/penilaian?startDate=${start}&endDate=${end}`),
+        fetch(`/api/sheets/master-list?t=${ts}`),
+        fetch(`/api/sheets/penilaian?startDate=${start}&endDate=${end}&t=${ts}`),
       ]);
       const dataMaster = await resMaster.json();
       const dataPenilaian = await resPenilaian.json();
@@ -134,6 +137,32 @@ export default function RekapanPage() {
   const handleCustomRange = () => {
     setActiveQuick('Custom');
     loadData(dateRange.start, dateRange.end);
+  };
+
+  const handleExportCsv = () => {
+    if (recapData.length === 0 || exporting) return;
+    setExporting('csv');
+    try {
+      exportRecapToCsv(recapData, dateRange);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengekspor CSV. Silakan coba lagi.');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportXlsx = async () => {
+    if (recapData.length === 0 || exporting) return;
+    setExporting('xlsx');
+    try {
+      await exportRecapToXlsx(recapData, dateRange);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengekspor XLSX. Silakan coba lagi.');
+    } finally {
+      setExporting(null);
+    }
   };
 
   const toggleExpand = (employeeId: string) => {
@@ -172,9 +201,29 @@ export default function RekapanPage() {
 
           {/* Date Filter */}
           <div className="mb-4 md:mb-6 bg-white rounded-2xl border border-neutral-100 shadow-sm p-3 sm:p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="w-4 h-4 text-neutral-500 flex-shrink-0" />
-              <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Filter Rentang Waktu</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-neutral-500 flex-shrink-0" />
+                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Filter Rentang Waktu</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportCsv}
+                  disabled={loading || recapData.length === 0 || exporting !== null}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 text-neutral-700 text-sm font-bold rounded-xl hover:bg-neutral-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileDown className="w-4 h-4" />
+                  CSV
+                </button>
+                <button
+                  onClick={handleExportXlsx}
+                  disabled={loading || recapData.length === 0 || exporting !== null}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] text-white text-sm font-bold rounded-xl hover:bg-black transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileDown className="w-4 h-4" />
+                  {exporting === 'xlsx' ? 'Mengekspor...' : 'XLSX'}
+                </button>
+              </div>
             </div>
             
             {/* Quick Options */}
