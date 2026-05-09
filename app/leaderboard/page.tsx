@@ -346,7 +346,7 @@ function LeaderboardContent() {
               <LoadingSpinner />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-x-auto">
               {leaderboardData.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-20 px-8 text-center">
                   <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mb-5 text-4xl">🏆</div>
@@ -357,8 +357,8 @@ function LeaderboardContent() {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto flex-1">
-                  <table className="w-full text-left whitespace-nowrap">
+                <div className="flex-1">
+                  <table className="min-w-full text-left whitespace-nowrap">
                     <thead className="bg-[#f8fafc] border-b border-neutral-100">
                       <tr>
                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs w-16 sm:w-20 text-center">Rank</th>
