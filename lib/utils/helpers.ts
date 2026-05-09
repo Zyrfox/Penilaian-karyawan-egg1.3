@@ -54,14 +54,19 @@ export function extractNameFromRaw(raw: string | undefined): string {
   return raw.slice(idx + 1).trim();
 }
 
+// Prefer the `_Name` embedded di raw record sebagai source of truth — itu nama
+// karyawan PADA SAAT submit, sehingga akurat untuk data historis meskipun ID
+// sudah dipindahkan ke orang lain (misal `BTM-001` lama = Irfan Hilmi, setelah
+// migrasi BTM→BTMK jadi `BTMK-001` yang di master list current = Havishky).
+// Master list cuma dipakai sebagai fallback kalau raw tidak ada `_Name` embedded.
 export function resolveDisplayName(
   id: string,
   raw: string | undefined,
   employees: { id: string; name: string }[]
 ): string {
-  const employee = employees.find((e) => e.id === id);
-  if (employee?.name) return employee.name;
   const fromRaw = extractNameFromRaw(raw);
   if (fromRaw) return fromRaw;
+  const employee = employees.find((e) => e.id === id);
+  if (employee?.name) return employee.name;
   return id;
 }
