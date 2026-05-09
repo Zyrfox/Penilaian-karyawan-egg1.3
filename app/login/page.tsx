@@ -9,6 +9,7 @@ interface EmployeeOption {
   id: string;
   name: string;
   outlet: string;
+  position?: string;
 }
 
 export default function LoginPage() {
@@ -28,7 +29,7 @@ export default function LoginPage() {
   useEffect(() => {
     async function loadUsers() {
       try {
-        const res = await fetch('/api/sheets/master-list');
+        const res = await fetch('/api/sheets/master-list?t=' + Date.now());
         const data = await res.json();
         if (data.success && data.data) {
           // Tampilkan semua user yang berhak login (konsisten dengan logika login route)
@@ -37,16 +38,17 @@ export default function LoginPage() {
             const position: string = emp.position || '';
             return (
               DIRECTORS.includes(id) ||
-              MANAGERS.includes(id) ||
-              SUPERVISORS.includes(id) ||
+              id.startsWith('DRK-') ||
+              id.startsWith('MGR-') ||
+              position.toUpperCase().includes('MANAGER') ||
+              id.startsWith('SPV-') ||
               PENILAI_KHUSUS.includes(id) ||
-              position.toUpperCase().includes('SPV') ||
-              Object.keys(VALID_CREDENTIALS).includes(id) // legacy fallback
+              position.toUpperCase().includes('SPV')
             );
           });
 
           if (!validUsers.find((u) => u.id === 'admin.media@easygoing.id')) {
-            validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTM' });
+            validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTM', position: 'Admin' });
           }
 
           // Ensure unique IDs in case spreadsheet has duplicates
@@ -128,15 +130,19 @@ export default function LoginPage() {
     }
   };
 
-  const getRoleLabel = (id: string) => {
-    if (id.startsWith('DRK')) return 'Direksi';
-    if (id.startsWith('MGR') || id === 'admin.media@easygoing.id' || id.startsWith('FRC') || id.startsWith('EGC-001')) return 'Manager';
+  const getRoleLabel = (emp: EmployeeOption) => {
+    const id = emp.id;
+    const position = emp.position || '';
+    if (id.startsWith('DRK') || DIRECTORS.includes(id)) return 'Direksi';
+    if (id.startsWith('MGR') || position.toUpperCase().includes('MANAGER') || id === 'admin.media@easygoing.id') return 'Manager';
     return 'Supervisor';
   };
 
-  const getRoleColor = (id: string) => {
-    if (id.startsWith('DRK')) return 'bg-[#1a1a1a] text-white';
-    if (id.startsWith('MGR') || id === 'admin.media@easygoing.id' || id.startsWith('FRC') || id.startsWith('EGC-001'))
+  const getRoleColor = (emp: EmployeeOption) => {
+    const id = emp.id;
+    const position = emp.position || '';
+    if (id.startsWith('DRK') || DIRECTORS.includes(id)) return 'bg-[#1a1a1a] text-white';
+    if (id.startsWith('MGR') || position.toUpperCase().includes('MANAGER') || id === 'admin.media@easygoing.id')
       return 'bg-violet-100 text-violet-700';
     return 'bg-blue-100 text-blue-700';
   };
@@ -188,8 +194,8 @@ export default function LoginPage() {
                           <p className="font-bold text-neutral-900 truncate">{selectedUser.name}</p>
                           <p className="text-xs text-neutral-400">{selectedUser.outlet} · {selectedUser.id}</p>
                         </div>
-                        <span className={`ml-auto flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${getRoleColor(selectedUser.id)}`}>
-                          {getRoleLabel(selectedUser.id)}
+                        <span className={`ml-auto flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${getRoleColor(selectedUser)}`}>
+                          {getRoleLabel(selectedUser)}
                         </span>
                       </div>
                     ) : (
@@ -241,8 +247,8 @@ export default function LoginPage() {
                                 <p className="text-sm font-bold text-neutral-900 truncate">{emp.name}</p>
                                 <p className="text-xs text-neutral-400">{emp.outlet} · {emp.id}</p>
                               </div>
-                              <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${getRoleColor(emp.id)}`}>
-                                {getRoleLabel(emp.id)}
+                              <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${getRoleColor(emp)}`}>
+                                {getRoleLabel(emp)}
                               </span>
                               {selectedUser?.id === emp.id && (
                                 <span className="text-[#1a1a1a] ml-1 flex-shrink-0">✓</span>

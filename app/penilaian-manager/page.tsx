@@ -345,6 +345,7 @@ export default function PenilaianManagerPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => setToast({ message, type }), []);
 
@@ -366,9 +367,10 @@ export default function PenilaianManagerPage() {
     } catch { router.push('/login'); return; }
 
     try {
+      const ts = Date.now();
       const [resMaster, resMgrRatings] = await Promise.all([
-        fetch('/api/sheets/master-list'),
-        fetch('/api/sheets/penilaian-manager'),
+        fetch(`/api/sheets/master-list?t=${ts}`),
+        fetch(`/api/sheets/penilaian-manager?t=${ts}`),
       ]);
       const dataMaster = await resMaster.json();
       const dataMgrRatings = await resMgrRatings.json();
@@ -388,6 +390,10 @@ export default function PenilaianManagerPage() {
           }
         });
         setDrafts(localDrafts);
+
+        if (dataMaster.warnings && dataMaster.warnings.length > 0) {
+          setWarnings(dataMaster.warnings);
+        }
       }
 
       if (dataMgrRatings.success) {
@@ -553,6 +559,20 @@ export default function PenilaianManagerPage() {
               </div>
             )}
           </div>
+
+          {warnings.length > 0 && (
+            <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-sm relative z-10">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <p className="font-bold text-red-900 mb-1">Peringatan Data (Perbaiki di Google Sheets)</p>
+                <ul className="list-disc pl-5 space-y-1 text-red-700">
+                  {warnings.map((w, idx) => (
+                    <li key={idx}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Manager Cards */}
           <div className="flex-1 space-y-3">

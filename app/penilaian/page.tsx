@@ -100,6 +100,7 @@ export default function PenilaianPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const ramadan = isRamadan();
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
@@ -132,9 +133,10 @@ export default function PenilaianPage() {
     }
 
     try {
+      const ts = Date.now();
       const [resMaster, resPenilaian] = await Promise.all([
-        fetch('/api/sheets/master-list'),
-        fetch('/api/sheets/penilaian'),
+        fetch(`/api/sheets/master-list?t=${ts}`),
+        fetch(`/api/sheets/penilaian?t=${ts}`),
       ]);
       const dataMaster = await resMaster.json();
       const dataPenilaian = await resPenilaian.json();
@@ -162,6 +164,10 @@ export default function PenilaianPage() {
           }
         });
         setDrafts(localDrafts);
+
+        if (dataMaster.warnings && dataMaster.warnings.length > 0) {
+          setWarnings(dataMaster.warnings);
+        }
       }
 
       if (dataPenilaian.success) {
@@ -368,6 +374,20 @@ export default function PenilaianPage() {
               </div>
             )}
           </div>
+
+          {warnings.length > 0 && (
+            <div className="mb-4 sm:mb-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-sm relative z-10">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <p className="font-bold text-red-900 mb-1">Peringatan Data (Perbaiki di Google Sheets)</p>
+                <ul className="list-disc pl-5 space-y-1 text-red-700">
+                  {warnings.map((w, idx) => (
+                    <li key={idx}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto pr-1 space-y-3 relative z-10">
             {employees.length === 0 ? (

@@ -35,29 +35,19 @@ export async function POST(request: NextRequest) {
       role = 'direksi';
       expectedPassword = ROLE_PASSWORDS.direksi;
 
-    } else if (MANAGERS.includes(username)) {
-      // Manager: hardcoded list
+    } else if (username === 'admin.media@easygoing.id' || (empData && (empData.id.startsWith('MGR-') || empData.position?.toUpperCase().includes('MANAGER')))) {
+      // ✅ DINAMIS: Manager
       role = 'manager';
       expectedPassword = ROLE_PASSWORDS.manager;
 
-    } else if (SUPERVISORS.includes(username)) {
-      // SPV: hardcoded (legacy fallback)
-      role = 'supervisor';
-      expectedPassword = ROLE_PASSWORDS.supervisor;
-
-    } else if (empData && empData.position && empData.position.toUpperCase().includes('SPV')) {
-      // ✅ DINAMIS: posisi di sheet mengandung kata "SPV" → otomatis jadi supervisor
-      role = 'supervisor';
-      expectedPassword = ROLE_PASSWORDS.supervisor;
-
-    } else if (PENILAI_KHUSUS.includes(username)) {
-      // Penilai khusus: non-SPV tapi kedudukannya setara (misal Irfan Hilmi)
+    } else if (PENILAI_KHUSUS.includes(username) || (empData && (empData.id.startsWith('SPV-') || (empData.position && empData.position.toUpperCase().includes('SPV'))))) {
+      // ✅ DINAMIS: SPV atau posisi di sheet mengandung kata "SPV"
       role = 'supervisor';
       expectedPassword = ROLE_PASSWORDS.supervisor;
 
     } else {
       return NextResponse.json(
-        { success: false, message: 'Username tidak ditemukan atau tidak memiliki akses' },
+        { success: false, message: 'Username tidak ditemukan atau tidak memiliki akses sebagai penilai' },
         { status: 401 }
       );
     }
