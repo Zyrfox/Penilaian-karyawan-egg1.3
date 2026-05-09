@@ -162,6 +162,9 @@ function ManagerCard({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-[10px] sm:text-xs font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                {manager.id}
+              </span>
               <h3 className="font-extrabold text-[#1a1a1a] text-sm sm:text-base leading-snug" style={{wordBreak:'break-word'}}>{manager.name}</h3>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${DIVISION_COLORS[division]}`}>{division}</span>
             </div>

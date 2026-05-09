@@ -314,9 +314,10 @@ export default function RekapanPage() {
                       <thead className="bg-[#f8fafc] border-b border-neutral-100">
                         <tr>
                           <th className="px-5 py-4 font-bold text-neutral-500 w-12">No</th>
-                          <th className="px-5 py-4 font-bold text-neutral-500">Nama</th>
+                          <th className="px-5 py-4 font-bold text-neutral-500">ID</th>
+                          <th className="px-5 py-4 font-bold text-neutral-500">Nama Lengkap</th>
+                          <th className="px-5 py-4 font-bold text-neutral-500">Posisi Spesifik</th>
                           <th className="px-5 py-4 font-bold text-neutral-500">Outlet</th>
-                          <th className="px-5 py-4 font-bold text-neutral-500">Posisi</th>
                           <th className="px-5 py-4 font-bold text-neutral-500 text-center w-24">Rata²</th>
                           <th className="px-5 py-4 font-bold text-neutral-500 text-center w-24">Predikat</th>
                         </tr>
@@ -329,6 +330,11 @@ export default function RekapanPage() {
                               onClick={() => toggleExpand(row.employeeId)}
                             >
                               <td className="px-5 py-4 font-medium text-neutral-500">{row.no}</td>
+                              <td className="px-5 py-4">
+                                <span className="font-mono text-xs font-bold text-neutral-600 bg-neutral-100 px-2 py-1 rounded whitespace-nowrap">
+                                  {row.employeeId}
+                                </span>
+                              </td>
                               <td className="px-5 py-4 font-bold text-[#1a1a1a]">
                                 <div className="flex items-center gap-2">
                                   <span>{row.employeeName}</span>
@@ -339,10 +345,10 @@ export default function RekapanPage() {
                                 </div>
                                 <p className="text-xs text-neutral-400 font-normal mt-0.5">{row.raters.length} penilai</p>
                               </td>
-                              <td className="px-5 py-4 font-medium text-neutral-600">{row.outlet}</td>
-                              <td className="px-5 py-4 text-neutral-500 max-w-[180px]">
+                              <td className="px-5 py-4 text-neutral-500 max-w-[200px]">
                                 <span className="block truncate">{row.position}</span>
                               </td>
+                              <td className="px-5 py-4 font-medium text-neutral-600">{row.outlet}</td>
                               <td className={`px-5 py-4 text-center font-extrabold text-lg ${getScoreColor(row.averageScore)}`}>
                                 {row.averageScore.toFixed(2)}
                               </td>
@@ -359,7 +365,7 @@ export default function RekapanPage() {
                             </tr>
                             {row.isExpanded && (
                               <tr>
-                                <td colSpan={6} className="px-0 py-0 bg-blue-50/20 border-b border-neutral-100">
+                                <td colSpan={7} className="px-0 py-0 bg-blue-50/20 border-b border-neutral-100">
                                   <div className="py-4 px-6 md:px-14">
                                     <h4 className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-widest mb-3">Detail per Penilai</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -407,7 +413,12 @@ export default function RekapanPage() {
 
                               {/* Name & meta */}
                               <div className="flex-1 min-w-0">
-                                <p className="font-extrabold text-[#1a1a1a] text-sm leading-tight">{row.employeeName}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-mono text-[10px] font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                                    {row.employeeId}
+                                  </span>
+                                  <p className="font-extrabold text-[#1a1a1a] text-sm leading-tight">{row.employeeName}</p>
+                                </div>
                                 <p className="text-xs text-neutral-400 mt-0.5 truncate">{row.position} · {row.outlet}</p>
                                 <div className="flex items-center gap-1 mt-1">
                                   <Users className="w-3 h-3 text-neutral-400" />

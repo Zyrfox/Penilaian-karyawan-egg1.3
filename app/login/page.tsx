@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, Lock, ChevronDown, Search, User, Eye, EyeOff } from 'lucide-react';
-import { VALID_CREDENTIALS, MANAGERS, SUPERVISORS, DIRECTORS, PENILAI_KHUSUS } from '@/lib/utils/constants';
+import { resolveRole } from '@/lib/utils/roles';
 
 interface EmployeeOption {
   id: string;
@@ -32,23 +32,12 @@ export default function LoginPage() {
         const res = await fetch('/api/sheets/master-list?t=' + Date.now());
         const data = await res.json();
         if (data.success && data.data) {
-          // Tampilkan semua user yang berhak login (konsisten dengan logika login route)
-          const validUsers: EmployeeOption[] = data.data.filter((emp: any) => {
-            const id: string = emp.id;
-            const position: string = emp.position || '';
-            return (
-              DIRECTORS.includes(id) ||
-              id.startsWith('DRK-') ||
-              id.startsWith('MGR-') ||
-              position.toUpperCase().includes('MANAGER') ||
-              id.startsWith('SPV-') ||
-              PENILAI_KHUSUS.includes(id) ||
-              position.toUpperCase().includes('SPV')
-            );
-          });
+          const validUsers: EmployeeOption[] = data.data.filter(
+            (emp: any) => resolveRole({ id: emp.id, position: emp.position }) !== null
+          );
 
           if (!validUsers.find((u) => u.id === 'admin.media@easygoing.id')) {
-            validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTM', position: 'Admin' });
+            validUsers.push({ id: 'admin.media@easygoing.id', name: 'Admin Media', outlet: 'BTMK', position: 'Admin' });
           }
 
           // Ensure unique IDs in case spreadsheet has duplicates
@@ -131,20 +120,21 @@ export default function LoginPage() {
   };
 
   const getRoleLabel = (emp: EmployeeOption) => {
-    const id = emp.id;
-    const position = emp.position || '';
-    if (id.startsWith('DRK') || DIRECTORS.includes(id)) return 'Direksi';
-    if (id.startsWith('MGR') || position.toUpperCase().includes('MANAGER') || id === 'admin.media@easygoing.id') return 'Manager';
-    return 'Supervisor';
+    switch (resolveRole({ id: emp.id, position: emp.position })) {
+      case 'direksi': return 'Direksi';
+      case 'manager': return 'Manager';
+      case 'supervisor': return 'Supervisor';
+      default: return '';
+    }
   };
 
   const getRoleColor = (emp: EmployeeOption) => {
-    const id = emp.id;
-    const position = emp.position || '';
-    if (id.startsWith('DRK') || DIRECTORS.includes(id)) return 'bg-[#1a1a1a] text-white';
-    if (id.startsWith('MGR') || position.toUpperCase().includes('MANAGER') || id === 'admin.media@easygoing.id')
-      return 'bg-violet-100 text-violet-700';
-    return 'bg-blue-100 text-blue-700';
+    switch (resolveRole({ id: emp.id, position: emp.position })) {
+      case 'direksi': return 'bg-[#1a1a1a] text-white';
+      case 'manager': return 'bg-violet-100 text-violet-700';
+      case 'supervisor': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-neutral-100 text-neutral-600';
+    }
   };
 
   return (

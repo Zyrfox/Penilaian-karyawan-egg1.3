@@ -1,8 +1,9 @@
 import { getMasterList } from '@/lib/api/sheets';
-import { MANAGERS, SUPERVISORS, DIRECTORS, PENILAI_KHUSUS, ROLE_PASSWORDS } from '@/lib/utils/constants';
+import { ROLE_PASSWORDS } from '@/lib/utils/constants';
+import { resolveRole, outletFromId } from '@/lib/utils/roles';
 import { signToken } from '@/lib/api/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { User, UserRole } from '@/lib/types';
+import { User } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── 1. Ambil data dari Master List (Google Sheets) ──────────────────────
     let masterList: any[] = [];
     try {
       masterList = await getMasterList();
@@ -26,33 +26,16 @@ export async function POST(request: NextRequest) {
 
     const empData = masterList.find((e: any) => e.id === username);
 
-    // ── 2. Tentukan role berdasarkan prioritas ──────────────────────────────
-    let role: UserRole | null = null;
-    let expectedPassword = '';
-
-    if (DIRECTORS.includes(username)) {
-      // Direksi: hardcoded list
-      role = 'direksi';
-      expectedPassword = ROLE_PASSWORDS.direksi;
-
-    } else if (username === 'admin.media@easygoing.id' || (empData && (empData.id.startsWith('MGR-') || empData.position?.toUpperCase().includes('MANAGER')))) {
-      // ✅ DINAMIS: Manager
-      role = 'manager';
-      expectedPassword = ROLE_PASSWORDS.manager;
-
-    } else if (PENILAI_KHUSUS.includes(username) || (empData && (empData.id.startsWith('SPV-') || (empData.position && empData.position.toUpperCase().includes('SPV'))))) {
-      // ✅ DINAMIS: SPV atau posisi di sheet mengandung kata "SPV"
-      role = 'supervisor';
-      expectedPassword = ROLE_PASSWORDS.supervisor;
-
-    } else {
+    const role = resolveRole({ id: username, position: empData?.position });
+    if (!role) {
       return NextResponse.json(
         { success: false, message: 'Username tidak ditemukan atau tidak memiliki akses sebagai penilai' },
         { status: 401 }
       );
     }
 
-    // ── 3. Validasi password ────────────────────────────────────────────────
+    const expectedPassword = ROLE_PASSWORDS[role];
+
     if (password !== expectedPassword) {
       return NextResponse.json(
         { success: false, message: 'Password salah' },
@@ -60,10 +43,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── 4. Buat token & response ────────────────────────────────────────────
     const displayName = empData?.name || username;
     const displayPosition = empData?.position || '';
-    const outlet = empData?.outlet || username.split('-')[0];
+    const outlet = empData?.outlet || outletFromId(username);
 
     const user: User = {
       id: username,

@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { GOOGLE_SHEETS } from '../utils/constants';
+import { normalizeOutletCode, normalizeEmployeeId } from '../utils/roles';
 
 function getGoogleAuth() {
   const accountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -35,10 +36,10 @@ export async function getMasterList() {
 
     return rows
       .map((row, index) => ({
-        id: row[0]?.trim() || '',
+        id: normalizeEmployeeId(row[0]?.trim() || ''),
         name: row[1]?.trim() || '',
         position: row[2]?.trim() || '',
-        outlet: row[3]?.trim() || '',
+        outlet: normalizeOutletCode(row[3]?.trim() || ''),
         status: row[4]?.trim() || 'Aktif',
         _rowNumber: index + 1
       }))
@@ -63,12 +64,12 @@ export async function getPenilaianData(startDate?: string, endDate?: string) {
 
     let data = rows.slice(1).map((row) => ({
       tanggal: row[0],
-      namaPenilai: row[1]?.split('_')[0] || row[1],
+      namaPenilai: normalizeEmployeeId(row[1]?.split('_')[0] || row[1] || ''),
       namaPenilaiRaw: row[1] || '',
-      karyawanDinilai: row[2]?.split('_')[0] || row[2],
+      karyawanDinilai: normalizeEmployeeId(row[2]?.split('_')[0] || row[2] || ''),
       karyawanDinilaiRaw: row[2] || '',
       posisi: row[3],
-      outlet: row[4],
+      outlet: normalizeOutletCode(row[4] || ''),
       status: row[5],
       komunikasi: row[6],
       kerja_sama: row[7],
@@ -133,8 +134,8 @@ export async function getManagerRatings(startDate?: string, endDate?: string) {
 
     let data = rows.slice(1).map((row) => ({
       tanggal: row[0] || '',
-      namaPenilai: row[1] || '',
-      managerDinilai: row[2] || '',
+      namaPenilai: normalizeEmployeeId(row[1]?.split('_')[0] || row[1] || ''),
+      managerDinilai: normalizeEmployeeId(row[2]?.split('_')[0] || row[2] || ''),
       managerDinilaiRaw: row[2] || '',
       divisi: row[3] || '',
       // General (E–H = index 4–7)

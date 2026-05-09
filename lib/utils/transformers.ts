@@ -94,7 +94,7 @@ export function groupByEmployeeForRecap(
         no: rowNo++,
         employeeId: empId,
         employeeName: resolveDisplayName(empId, firstRecord?.karyawanDinilaiRaw, employees),
-        outlet: employee?.outlet || firstRecord?.outlet || 'BTM',
+        outlet: employee?.outlet || firstRecord?.outlet || 'BTMK',
         position: employee?.position || firstRecord?.posisi || 'Unknown',
         raters: ratingRecords.map(r => ({
           raterId: r.namaPenilai,

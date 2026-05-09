@@ -51,11 +51,26 @@ Row 2+: Employee Data
 ```
 
 **Data Types:**
-- ID Karyawan (string): format [PREFIX]-[NUMBER] contoh: BTM-001, TSF-005
+- ID Karyawan (string): mengikuti grammar prefix berlapis (lihat bagian "Konvensi ID" di bawah). Contoh: `DRK-001`, `MGR-001`, `MGR-FRC-001`, `SPV-BTMK-001`, `BTMK-001`, `FRL-BTMK-001`.
 - Nama Lengkap (string): maksimal 100 karakter
 - Posisi Spesifik (string): nilai tetap dari enum posisi yang valid
-- Outlet Asal (string): enum [BTM, BTMF, TSF, MBA, EGC, HCP, FRC]
+- Outlet Asal (string): enum [BTMK, BTMF, TSF, MBA, EGC, HCP, FRC, ENC]
 - Status (string): enum [Aktif, Tidak Aktif]
+
+**Konvensi ID Karyawan (canonical, per 2026-05-09):**
+
+| Pola | Arti | Contoh |
+|---|---|---|
+| `DRK-NNN` | Direksi (HQ) | `DRK-001` … `DRK-006` |
+| `MGR-NNN` | Manager HQ-level (outlet `ALL OUTLET / HQ`) | `MGR-001` … `MGR-005` |
+| `MGR-XXX-NNN` | Manager outlet-scoped | `MGR-FRC-001`, `MGR-EGC-001`, `MGR-ENC-001` |
+| `SPV-XXX-NNN` | Supervisor outlet-scoped | `SPV-BTMK-001`, `SPV-BTMF-001`, `SPV-TSF-001` |
+| `XXX-NNN` | Staff (tanpa role prefix) | `BTMK-001`, `BTMF-001`, `TSF-001`, `EGC-…`, `MBA-…`, `HCP-…` |
+| `FRL-XXX-NNN` | Freelance (staff) outlet-scoped | `FRL-BTMK-001`, `FRL-BTMF-001`, `FRL-TSF-…` |
+
+**Aturan parsing (regex canonical):** `^(?:(DRK|MGR|SPV|FRL)-)?(?:([A-Z]+)-)?(\d+)$` — capture pertama = role prefix (opsional), kedua = outlet (opsional, kosong untuk `MGR-001`/`DRK-001`), ketiga = nomor. Implementasi: `parseEmployeeId` di `lib/utils/roles.ts`.
+
+**Migrasi `BTM` → `BTMK`:** outlet code lama `BTM` (Back To Mie Kitchen) di-rename jadi `BTMK` agar tidak overlap dengan ID staff `BTM-xxx`. Parser sheet otomatis menormalkan `BTM` lama menjadi `BTMK` lewat `normalizeOutletCode`/`normalizeEmployeeId` di `lib/utils/roles.ts`, sehingga data historis tetap bekerja meski sheet belum sepenuhnya dimigrasi.
 
 **Valid Positions:**
 ```javascript
@@ -97,7 +112,7 @@ const VALID_POSITIONS = [
 
 **Valid Outlets:**
 ```javascript
-const VALID_OUTLETS = ["BTM", "BTMF", "TSF", "MBA", "EGC", "HCP", "FRC"];
+const VALID_OUTLETS = ["BTMK", "BTMF", "TSF", "MBA", "EGC", "HCP", "FRC", "ENC"];
 ```
 
 #### Sheet: DB_Penilaian New
@@ -1080,36 +1095,32 @@ Rata-rata per Outlet:
 
 ### 7.2 Login Logic
 
-**Credentials:**
-```typescript
-const VALID_CREDENTIALS = {
-  'MGR-001': 'EGG2026',
-  'MGR-002': 'EGG2026',
-  'MGR-003': 'EGG2026',
-  'MGR-004': 'EGG2026',
-  'FRC-001': 'EGG2026',
-  'EGC-001': 'EGG2026',
-  'BTM-003': 'EGG2026',
-  'BTM-010': 'EGG2026',
-  'BTMF-001': 'EGG2026',
-  'TSF-001': 'EGG2026',
-  'TSF-002': 'EGG2026',
-  'TSF-008': 'EGG2026',
-  'TSF-011': 'EGG2026',
-  'EGC-002': 'EGG2026',
-  // semua manager & supervisor
-};
+**Pendeteksian role berbasis prefix ID + posisi (data-driven):**
 
-function validateLogin(username: string, password: string): {valid: boolean, role: string, name: string} {
-  const isValid = VALID_CREDENTIALS[username] === password;
-  if (!isValid) return {valid: false, role: '', name: ''};
-  
-  const role = username.startsWith('MGR') ? 'manager' : 'supervisor';
-  const name = getEmployeeNameFromMasterList(username);
-  
-  return {valid: true, role, name};
+Username harus berupa Employee ID dari Master_List. Role otomatis ditentukan dari ID prefix dan kolom `Posisi Spesifik` (lihat `lib/utils/roles.ts` → `resolveRole`).
+
+```typescript
+// Pseudocode (implementasi sebenarnya di lib/utils/roles.ts)
+function resolveRole({ id, position }) {
+  if (id.startsWith('DRK-') || DIRECTORS.includes(id)) return 'direksi';
+  if (id === 'admin.media@easygoing.id' ||
+      id.startsWith('MGR-') ||
+      position?.toUpperCase().includes('MANAGER')) return 'manager';
+  if (id.startsWith('SPV-') ||
+      position?.toUpperCase().includes('SPV')) return 'supervisor';
+  return null; // staff & freelance bukan penilai
 }
 ```
+
+**Password per role (single source of truth — `ROLE_PASSWORDS` di `lib/utils/constants.ts`):**
+
+| Role | Password |
+|---|---|
+| Direksi (`DRK-*`) | `EGG_DIREKSI2026` |
+| Manager (`MGR-*` atau posisi mengandung `MANAGER`) | `EGG_MANAGER2026` |
+| Supervisor (`SPV-*` atau posisi mengandung `SPV`) | `EGG2026` |
+
+Setiap user yang ditambahkan ke Master_List dengan ID berprefix yang sesuai otomatis dapat login — tidak perlu update tabel kredensial. Staff (`BTMK-*`, `BTMF-*`, dll. tanpa prefix peran) dan freelance (`FRL-*`) **tidak** dapat login.
 
 **Session Management:**
 - Store JWT token di localStorage + httpOnly cookie (jika bisa)

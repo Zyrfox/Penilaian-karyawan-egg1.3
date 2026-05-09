@@ -362,8 +362,9 @@ function LeaderboardContent() {
                     <thead className="bg-[#f8fafc] border-b border-neutral-100">
                       <tr>
                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs w-16 sm:w-20 text-center">Rank</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">ID</th>
                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs">Nama Karyawan</th>
-                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">Posisi</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs hidden md:table-cell">Posisi Spesifik</th>
                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Outlet</th>
                         <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center">Score</th>
                          <th className="px-3 sm:px-6 py-3 sm:py-4 font-extrabold text-neutral-400 uppercase tracking-widest text-xs text-center hidden md:table-cell">Penilai</th>
@@ -379,7 +380,17 @@ function LeaderboardContent() {
                           <td className="px-3 sm:px-6 py-3 sm:py-5 text-center font-bold text-xl sm:text-2xl">
                             {getRankMedal(row.rank)}
                           </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 hidden md:table-cell">
+                            <span className="font-mono text-xs font-bold text-neutral-600 bg-neutral-100 px-2 py-1 rounded whitespace-nowrap">
+                              {row.employeeId}
+                            </span>
+                          </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-5">
+                            <div className="md:hidden flex items-center gap-2 flex-wrap mb-0.5">
+                              <span className="font-mono text-[10px] font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                                {row.employeeId}
+                              </span>
+                            </div>
                             <div className="font-extrabold text-[#1a1a1a] text-sm sm:text-base">{row.employeeName}</div>
                             <div className="md:hidden text-xs font-semibold text-neutral-400 mt-0.5">{row.position}</div>
                           </td>

@@ -173,9 +173,15 @@ export function RatingCard({
             <span className="font-extrabold text-neutral-600 text-sm">{employee.name.charAt(0)}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-[#1a1a1a] text-sm sm:text-base leading-snug" style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>{employee.name}</h3>
-            <p className="text-xs text-neutral-500 truncate">
-              {employee.outlet} – {employee.position}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-[10px] sm:text-xs font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                {employee.id}
+              </span>
+              <h3 className="font-extrabold text-[#1a1a1a] text-sm sm:text-base leading-snug" style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>{employee.name}</h3>
+            </div>
+            <p className="text-xs text-neutral-500 truncate mt-0.5">
+              {employee.position}
+              {employee.outlet && <span className="text-neutral-400"> · {employee.outlet}</span>}
               {isLocked && (
                 <span className="ml-2 inline-flex items-center gap-1 text-amber-600 font-semibold">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>

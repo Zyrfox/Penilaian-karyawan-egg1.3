@@ -130,7 +130,7 @@ export function normalizeLeaderboardScores(
     return {
       employeeId: empId,
       employeeRaw: firstRecord?.karyawanDinilaiRaw,
-      outlet: employee?.outlet || firstRecord?.outlet || 'BTM' as OutletCode, // default fallback
+      outlet: employee?.outlet || firstRecord?.outlet || 'BTMK' as OutletCode, // default fallback
       position: firstRecord?.posisi,
       ratingCount: records.length,
       rawAverage

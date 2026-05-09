@@ -45,24 +45,7 @@ export function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function getOutletFromEmployeeId(empId: string): string {
-  if (!empId) return '';
-  const match = empId.match(/^([A-Z]+)-/);
-  return match ? match[1] : '';
-}
-
-export function isManager(employeeId: string): boolean {
-  if (!employeeId) return false;
-  return employeeId.startsWith('MGR-') || employeeId === 'FRC-001' || employeeId === 'EGC-001';
-}
-
-export function isSupervisor(employeeId: string): boolean {
-  if (!employeeId) return false;
-  return (
-    employeeId.startsWith('SPV') ||
-    ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-008', 'TSF-011', 'EGC-002'].includes(employeeId)
-  );
-}
+export { outletFromId as getOutletFromEmployeeId } from './roles';
 
 export function extractNameFromRaw(raw: string | undefined): string {
   if (!raw) return '';

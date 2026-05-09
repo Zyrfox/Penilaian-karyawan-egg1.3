@@ -25,30 +25,26 @@ export const RATING_CATEGORIES: RatingCategoryMeta[] = [
   { id: 'puasa', label: 'Melaksanakan Puasa', section: 'IBADAH', required: false, displayOrder: 15 },
 ];
 
-export const VALID_OUTLETS: OutletCode[] = ['BTM', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC'];
+export const VALID_OUTLETS: OutletCode[] = ['BTMK', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC', 'ENC'];
 
 export const OUTLET_NAMES: Record<OutletCode, string> = {
-  BTM: 'Back To Mie Kitchen',
+  BTMK: 'Back To Mie Kitchen',
   BTMF: 'Back To Mie Forest',
   TSF: 'Taman Sari Forest',
   MBA: 'Motoright Berkah Auto',
   EGC: 'EGC',
   HCP: 'Healthopia Clinic',
-  FRC: 'Franchise'
+  FRC: 'Franchise',
+  ENC: 'Easee n Co'
 };
 
-export const MANAGERS = ['MGR-001', 'MGR-002', 'MGR-003', 'MGR-004', 'FRC-001', 'EGC-001', 'admin.media@easygoing.id'];
-export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-004', 'TSF-008', 'TSF-011', 'EGC-002'];
+// Exception slots: IDs that don't follow the prefix convention but should still
+// be treated as that role. Empty under the current ID scheme — every manager/SPV
+// has an MGR-/SPV- prefix in the Master List. Keep the exports as override hooks.
+export const MANAGERS: string[] = [];
+export const SUPERVISORS: string[] = [];
 export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005', 'DRK-006'];
-
-/**
- * Penilai Khusus: karyawan yang kedudukannya setara SPV (bisa login & menilai)
- * meskipun posisi di Master List bukan "SPV".
- * Tambahkan ID karyawan di sini jika perlu akses sebagai penilai.
- */
-export const PENILAI_KHUSUS: string[] = [
-  'BTM-001', // Mochammad Irfan Hilmi — Kepala Media & Informasi (setara SPV)
-];
+export const PENILAI_KHUSUS: string[] = [];
 
 /** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat */
 export const ROLE_PASSWORDS = {
@@ -57,37 +53,8 @@ export const ROLE_PASSWORDS = {
   direksi:    'EGG_DIREKSI2026',
 } as const;
 
-export const VALID_CREDENTIALS: Record<string, string> = {
-  // --- Admin ---
-  'admin.media@easygoing.id': 'EGG_MANAGER2026',
-  // --- Manager (password berbeda dari SPV) ---
-  'MGR-001': 'EGG_MANAGER2026',
-  'MGR-002': 'EGG_MANAGER2026',
-  'MGR-003': 'EGG_MANAGER2026',
-  'MGR-004': 'EGG_MANAGER2026',
-  'FRC-001': 'EGG_MANAGER2026',
-  'EGC-001': 'EGG_MANAGER2026',
-  // --- Supervisor ---
-  'BTM-003': 'EGG2026',
-  'BTM-010': 'EGG2026',
-  'BTMF-001': 'EGG2026',
-  'TSF-001': 'EGG2026',
-  'TSF-002': 'EGG2026',
-  'TSF-004': 'EGG2026',
-  'TSF-008': 'EGG2026',
-  'TSF-011': 'EGG2026',
-  'EGC-002': 'EGG2026',
-  // --- Direksi ---
-  'DRK-001': 'EGG_DIREKSI2026',
-  'DRK-002': 'EGG_DIREKSI2026',
-  'DRK-003': 'EGG_DIREKSI2026',
-  'DRK-004': 'EGG_DIREKSI2026',
-  'DRK-005': 'EGG_DIREKSI2026',
-  'DRK-006': 'EGG_DIREKSI2026',
-};
-
 export const PENILAIAN_TARGETS: Record<string, string[]> = {
-  manager: ['BTM', 'BTMF', 'TSF'],
+  manager: ['BTMK', 'BTMF', 'TSF'],
 };
 
 // Google Sheets Configuration
@@ -122,7 +89,7 @@ export const TOAST_CONFIG = {
 };
 
 export const VALID_POSITIONS_BY_OUTLET: Record<OutletCode, string[]> = {
-  BTM: [
+  BTMK: [
     'SPV Komersial', 'SPV Keuangan',
     'Kepala Media & Informasi', 'Senior Staff Support', 'Senior Staff Cashier',
     'Staff Waiters', 'Staff Kitchen', 'Staff Cassier', 'Staff support'
@@ -146,5 +113,8 @@ export const VALID_POSITIONS_BY_OUTLET: Record<OutletCode, string[]> = {
   ],
   FRC: [
     'Manager Rentcar'
+  ],
+  ENC: [
+    'Manager Operasional Easee n Co'
   ]
 };

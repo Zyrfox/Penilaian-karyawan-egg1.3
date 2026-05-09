@@ -127,12 +127,12 @@ export interface LoginResponse {
 
 ### 2.2 Employee & Organization Types
 ```typescript
-export type OutletCode = 'BTM' | 'BTMF' | 'TSF' | 'MBA' | 'EGC' | 'HCP' | 'FRC';
+export type OutletCode = 'BTMK' | 'BTMF' | 'TSF' | 'MBA' | 'EGC' | 'HCP' | 'FRC' | 'ENC';
 
 export type EmployeeStatus = 'Aktif' | 'Tidak Aktif';
 
 export interface Employee {
-  id: string; // format: [OUTLET]-[NUMBER]
+  id: string; // grammar: [DRK|MGR|SPV|FRL-]?[OUTLET-]NNN — lihat lib/utils/roles.ts parseEmployeeId
   name: string;
   position: string;
   outlet: OutletCode;
@@ -329,41 +329,36 @@ export const RATING_CATEGORIES: RatingCategoryMeta[] = [
   { id: 'puasa', label: 'Melaksanakan Puasa', section: 'IBADAH', required: false, displayOrder: 15 },
 ];
 
-export const VALID_OUTLETS: OutletCode[] = ['BTM', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC'];
+export const VALID_OUTLETS: OutletCode[] = ['BTMK', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC', 'ENC'];
 
 export const OUTLET_NAMES: Record<OutletCode, string> = {
-  BTM: 'Back To Mie Kitchen',
+  BTMK: 'Back To Mie Kitchen',
   BTMF: 'Back To Mie Forest',
   TSF: 'Taman Sari Forest',
   MBA: 'Motoright Berkah Auto',
   EGC: 'EGC',
   HCP: 'Healthopia Clinic',
-  FRC: 'Franchise'
+  FRC: 'Franchise',
+  ENC: 'Easee n Co'
 };
 
-export const MANAGERS = ['MGR-001', 'MGR-002', 'MGR-003', 'MGR-004', 'FRC-001', 'EGC-001'];
-export const SUPERVISORS = ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-008', 'TSF-011', 'EGC-002'];
+// Exception slots: tetap ada untuk override IDs yang tidak mengikuti konvensi prefix.
+// Di skema saat ini ketiganya kosong karena role detection sepenuhnya prefix-based.
+export const MANAGERS: string[] = [];
+export const SUPERVISORS: string[] = [];
+export const PENILAI_KHUSUS: string[] = [];
+export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005', 'DRK-006'];
 
-export const VALID_CREDENTIALS: Record<string, string> = {
-  'MGR-001': 'EGG2026',
-  'MGR-002': 'EGG2026',
-  'MGR-003': 'EGG2026',
-  'MGR-004': 'EGG2026',
-  'FRC-001': 'EGG2026',
-  'EGC-001': 'EGG2026',
-  'BTM-003': 'EGG2026',
-  'BTM-010': 'EGG2026',
-  'BTMF-001': 'EGG2026',
-  'TSF-001': 'EGG2026',
-  'TSF-002': 'EGG2026',
-  'TSF-008': 'EGG2026',
-  'TSF-011': 'EGG2026',
-  'EGC-002': 'EGG2026',
-};
+// Password per role — single source of truth, tidak ada lagi tabel VALID_CREDENTIALS.
+export const ROLE_PASSWORDS = {
+  supervisor: 'EGG2026',
+  manager:    'EGG_MANAGER2026',
+  direksi:    'EGG_DIREKSI2026',
+} as const;
 
 export const PENILAIAN_TARGETS: Record<string, string[]> = {
-  manager: ['BTM', 'BTMF', 'TSF'], // manager hanya nilai ke 3 outlet ini
-  // supervisor akan di-compute based on their outlet
+  manager: ['BTMK', 'BTMF', 'TSF'], // manager hanya nilai ke 3 outlet ini
+  // supervisor di-compute dari outlet user; BTMK & BTMF digabung satu scope
 };
 
 // Google Sheets Configuration
@@ -399,7 +394,7 @@ export const TOAST_CONFIG = {
 
 // Valid Positions untuk setiap outlet
 export const VALID_POSITIONS_BY_OUTLET: Record<OutletCode, string[]> = {
-  BTM: [
+  BTMK: [
     'SPV Komersial', 'SPV Keuangan',
     'Kepala Media & Informasi', 'Senior Staff Support', 'Senior Staff Cashier',
     'Staff Waiters', 'Staff Kitchen', 'Staff Cassier', 'Staff support'
@@ -594,41 +589,18 @@ export function normalizeLeaderboardScores(
 ```typescript
 // lib/utils/validators.ts
 
-import { RatingGrade, RatingCategory, VALID_OUTLETS, MANAGERS, SUPERVISORS } from '@/lib/types';
-import { RATING_CATEGORIES, VALID_CREDENTIALS } from './constants';
+import { RatingGrade, RatingCategory } from '@/lib/types';
+import { RATING_CATEGORIES } from './constants';
+import { isManager, isSupervisor } from './roles';
 
 export interface ValidationError {
   field: string;
   message: string;
 }
 
-/**
- * Validate login credentials
- */
-export function validateLoginCredentials(
-  username: string,
-  password: string
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-
-  if (!username || username.trim() === '') {
-    errors.push({ field: 'username', message: 'Username tidak boleh kosong' });
-  }
-
-  if (!password || password.trim() === '') {
-    errors.push({ field: 'password', message: 'Password tidak boleh kosong' });
-  }
-
-  if (username && password && !VALID_CREDENTIALS[username]) {
-    errors.push({ field: 'username', message: 'Username tidak ditemukan' });
-  }
-
-  if (username && password && VALID_CREDENTIALS[username] !== password) {
-    errors.push({ field: 'password', message: 'Password salah' });
-  }
-
-  return errors;
-}
+// Catatan: validasi login (username/password) sekarang dilakukan server-side di
+// app/api/auth/login/route.ts memakai resolveRole() + ROLE_PASSWORDS — tidak ada
+// lagi tabel VALID_CREDENTIALS atau validateLoginCredentials di sini.
 
 /**
  * Validate rating form before submission
@@ -690,7 +662,10 @@ export function validateDateRange(
 }
 
 /**
- * Check if user can rate another employee
+ * Check if user can rate another employee.
+ * Role gating untuk "tidak bisa menilai manager/SPV lain" menggunakan helper
+ * isManager / isSupervisor dari lib/utils/roles.ts (data-driven via prefix ID
+ * & posisi), bukan array hardcoded.
  */
 export function canUserRate(
   raterRole: string,
@@ -698,33 +673,30 @@ export function canUserRate(
   raterEmployeeId: string,
   rateeEmployeeId: string,
   rateeOutlet: string,
-  rateeRole?: string
+  rateePosition?: string
 ): { canRate: boolean; reason?: string } {
-  // Cannot rate self
   if (raterEmployeeId === rateeEmployeeId) {
     return { canRate: false, reason: 'Tidak bisa menilai diri sendiri' };
   }
 
-  // Manager can rate everyone in BTM, BTMF, TSF
+  const ratee = { id: rateeEmployeeId, position: rateePosition };
+
+  // Manager menilai semua karyawan di BTMK, BTMF, TSF — kecuali sesama manager
   if (raterRole === 'manager') {
-    if (['BTM', 'BTMF', 'TSF'].includes(rateeOutlet)) {
-      // But cannot rate other managers
-      if (!MANAGERS.includes(rateeEmployeeId)) {
-        return { canRate: true };
-      }
+    if (['BTMK', 'BTMF', 'TSF'].includes(rateeOutlet)) {
+      if (!isManager(ratee)) return { canRate: true };
     }
-    return { canRate: false, reason: 'Manager hanya bisa menilai outlet BTM, BTMF, TSF' };
+    return { canRate: false, reason: 'Manager hanya bisa menilai outlet BTMK, BTMF, TSF' };
   }
 
-  // Supervisor can only rate people in their outlet
+  // Supervisor menilai outlet sendiri (BTMK & BTMF digabung satu scope) — kecuali sesama SPV
   if (raterRole === 'supervisor') {
-    if (raterOutlet === rateeOutlet) {
-      // Cannot rate themselves or other supervisors
-      if (!SUPERVISORS.includes(rateeEmployeeId) && raterEmployeeId !== rateeEmployeeId) {
-        return { canRate: true };
-      }
+    const isBTMGroup = ['BTMK', 'BTMF'].includes(raterOutlet) && ['BTMK', 'BTMF'].includes(rateeOutlet);
+    const isSameOutlet = raterOutlet === rateeOutlet;
+    if (isSameOutlet || isBTMGroup) {
+      if (!isSupervisor(ratee)) return { canRate: true };
     }
-    return { canRate: false, reason: 'Supervisor hanya bisa menilai outlet mereka sendiri' };
+    return { canRate: false, reason: 'Supervisor hanya bisa menilai outlet mereka sendiri (BTMK & BTMF digabung)' };
   }
 
   return { canRate: false, reason: 'Role tidak dikenali' };
@@ -896,21 +868,17 @@ export function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function getOutletFromEmployeeId(empId: string): string {
-  const match = empId.match(/^([A-Z]+)-/);
-  return match ? match[1] : '';
-}
-
-export function isManager(employeeId: string): boolean {
-  return employeeId.startsWith('MGR-');
-}
-
-export function isSupervisor(employeeId: string): boolean {
-  return (
-    employeeId.startsWith('SPV') ||
-    ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-008', 'TSF-011', 'EGC-002'].includes(employeeId)
-  );
-}
+// ID parsing & role detection telah dipindahkan ke lib/utils/roles.ts:
+//   parseEmployeeId(id)              → { rolePrefix, outlet, number }
+//   resolveRole({ id, position })    → 'direksi' | 'manager' | 'supervisor' | null
+//   isManager / isSupervisor / isDireksi
+//   outletFromId(id)
+//   normalizeOutletCode(s)           — BTM → BTMK
+//   normalizeEmployeeId(s)           — BTM-001 → BTMK-001, SPV-BTM-001 → SPV-BTMK-001
+//
+// helpers.ts hanya re-export getOutletFromEmployeeId = outletFromId untuk
+// kompatibilitas. Regex naive `^([A-Z]+)-` TIDAK benar untuk ID compound
+// seperti MGR-FRC-001 / SPV-BTMK-001 / FRL-BTMK-001 — selalu pakai parseEmployeeId.
 ```
 
 ---
