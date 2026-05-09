@@ -63,3 +63,22 @@ export function isSupervisor(employeeId: string): boolean {
     ['BTM-003', 'BTM-010', 'BTMF-001', 'TSF-001', 'TSF-002', 'TSF-008', 'TSF-011', 'EGC-002'].includes(employeeId)
   );
 }
+
+export function extractNameFromRaw(raw: string | undefined): string {
+  if (!raw) return '';
+  const idx = raw.indexOf('_');
+  if (idx === -1) return '';
+  return raw.slice(idx + 1).trim();
+}
+
+export function resolveDisplayName(
+  id: string,
+  raw: string | undefined,
+  employees: { id: string; name: string }[]
+): string {
+  const employee = employees.find((e) => e.id === id);
+  if (employee?.name) return employee.name;
+  const fromRaw = extractNameFromRaw(raw);
+  if (fromRaw) return fromRaw;
+  return id;
+}

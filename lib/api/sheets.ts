@@ -34,15 +34,16 @@ export async function getMasterList() {
     if (!rows || rows.length < 2) return [];
 
     return rows
-      .slice(1)
-      .filter(row => row[1] && row[1].trim() !== '') // Hanya ambil row yang memiliki "Nama Lengkap"
-      .map((row) => ({
-        id: row[0] || '',
-        name: row[1] || '',
-        position: row[2] || '',
-        outlet: row[3] || '',
-        status: row[4] || 'Aktif',
-      }));
+      .map((row, index) => ({
+        id: row[0]?.trim() || '',
+        name: row[1]?.trim() || '',
+        position: row[2]?.trim() || '',
+        outlet: row[3]?.trim() || '',
+        status: row[4]?.trim() || 'Aktif',
+        _rowNumber: index + 1
+      }))
+      .slice(1) // exclude header
+      .filter(emp => emp.name !== ''); // Hanya ambil yang memiliki "Nama Lengkap"
   } catch (error: any) {
     console.error('getSheetsError (MasterList):', error);
     throw new Error('Gagal mengambil data dari server. Coba lagi.');
@@ -63,6 +64,7 @@ export async function getPenilaianData(startDate?: string, endDate?: string) {
     let data = rows.slice(1).map((row) => ({
       tanggal: row[0],
       namaPenilai: row[1]?.split('_')[0] || row[1],
+      namaPenilaiRaw: row[1] || '',
       karyawanDinilai: row[2]?.split('_')[0] || row[2],
       karyawanDinilaiRaw: row[2] || '',
       posisi: row[3],

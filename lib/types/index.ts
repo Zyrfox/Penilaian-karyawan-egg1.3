@@ -111,7 +111,9 @@ export interface RatingSubmission {
 export interface RatingRecord {
   tanggal: string;
   namaPenilai: string;
+  namaPenilaiRaw?: string;
   karyawanDinilai: string;
+  karyawanDinilaiRaw?: string;
   posisi: string;
   outlet: OutletCode;
   status: EmployeeStatus;

@@ -1,5 +1,6 @@
 import { RatingCategory, RatingGrade, RATING_SCALE, RatingRecord, Employee, LeaderboardEntry, OutletCode } from '@/lib/types';
 import { RATING_CATEGORIES } from './constants';
+import { resolveDisplayName } from './helpers';
 
 export function gradeToPoint(grade: RatingGrade): number {
   return RATING_SCALE[grade] || 0;
@@ -125,9 +126,12 @@ export function normalizeLeaderboardScores(
     // totalPoint dari sheet sudah dalam skala 1-5, tidak perlu dibagi 5 lagi
     const rawAverage = records.reduce((sum, r) => sum + r.totalPoint, 0) / records.length;
     const employee = employees.find(e => e.id === empId);
+    const firstRecord = records[0];
     return {
       employeeId: empId,
-      outlet: employee?.outlet || 'BTM' as OutletCode, // default fallback
+      employeeRaw: firstRecord?.karyawanDinilaiRaw,
+      outlet: employee?.outlet || firstRecord?.outlet || 'BTM' as OutletCode, // default fallback
+      position: firstRecord?.posisi,
       ratingCount: records.length,
       rawAverage
     };
@@ -155,13 +159,13 @@ export function normalizeLeaderboardScores(
   // Calculate normalized scores — simple average, no outlet normalization
   const normalized = employeeScores.map((score, index) => {
     const employee = employees.find(e => e.id === score.employeeId);
-    
+
     return {
       rank: index + 1, // will be re-sorted
       employeeId: score.employeeId,
-      employeeName: employee?.name || score.employeeId,
+      employeeName: resolveDisplayName(score.employeeId, score.employeeRaw, employees),
       outlet: score.outlet,
-      position: employee?.position || 'Unknown',
+      position: employee?.position || score.position || 'Unknown',
       ratingCount: score.ratingCount,
       rawAverage: score.rawAverage,
       normalizedScore: score.rawAverage, // = rata-rata semua penilai, tanpa normalisasi

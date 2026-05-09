@@ -1,5 +1,6 @@
 import { RatingRecord, Employee, RecapRow, RaterDetail, SheetRow } from '@/lib/types';
 import { RATING_CATEGORIES } from './constants';
+import { resolveDisplayName } from './helpers';
 
 export function transformToEmployees(sheetRows: any[][]): Employee[] {
   if (!sheetRows || sheetRows.length < 2) return [];
@@ -83,6 +84,7 @@ export function groupByEmployeeForRecap(
   return Array.from(grouped.entries())
     .map(([empId, ratingRecords]) => {
       const employee = employees.find(e => e.id === empId);
+      const firstRecord = ratingRecords[0];
       // totalPoint sudah dalam skala 1–5 (rata-rata nilai A/B/C/D/E)
       // JANGAN dibagi 5 lagi — itu menyebabkan B(4.23) menjadi 0.86 (E)
       const averageScore = ratingRecords.reduce((sum, r) => sum + r.totalPoint, 0) / ratingRecords.length;
@@ -91,12 +93,12 @@ export function groupByEmployeeForRecap(
       return {
         no: rowNo++,
         employeeId: empId,
-        employeeName: employee?.name || empId,
-        outlet: employee?.outlet || 'BTM',
-        position: employee?.position || 'Unknown',
+        employeeName: resolveDisplayName(empId, firstRecord?.karyawanDinilaiRaw, employees),
+        outlet: employee?.outlet || firstRecord?.outlet || 'BTM',
+        position: employee?.position || firstRecord?.posisi || 'Unknown',
         raters: ratingRecords.map(r => ({
           raterId: r.namaPenilai,
-          raterName: r.namaPenilai,
+          raterName: resolveDisplayName(r.namaPenilai, r.namaPenilaiRaw, employees),
           averageScore: r.totalPoint, // sudah skala 1–5
           submittedDate: r.tanggal
         })),
