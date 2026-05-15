@@ -31,7 +31,7 @@ export interface LoginResponse {
   user?: User;
 }
 
-export type OutletCode = 'BTMK' | 'BTMF' | 'TSF' | 'MBA' | 'EGC' | 'HCP' | 'FRC' | 'ENC';
+export type OutletCode = 'EGG' | 'BTMK' | 'BTMF' | 'TSF' | 'MBA' | 'EGC' | 'HCP' | 'FRC' | 'ENC';
 
 export type EmployeeStatus = 'Aktif' | 'Tidak Aktif';
 

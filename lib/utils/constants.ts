@@ -25,9 +25,10 @@ export const RATING_CATEGORIES: RatingCategoryMeta[] = [
   { id: 'puasa', label: 'Melaksanakan Puasa', section: 'IBADAH', required: false, displayOrder: 15 },
 ];
 
-export const VALID_OUTLETS: OutletCode[] = ['BTMK', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC', 'ENC'];
+export const VALID_OUTLETS: OutletCode[] = ['EGG', 'BTMK', 'BTMF', 'TSF', 'MBA', 'EGC', 'HCP', 'FRC', 'ENC'];
 
 export const OUTLET_NAMES: Record<OutletCode, string> = {
+  EGG: 'Easy Going Group (HQ)',
   BTMK: 'Back To Mie Kitchen',
   BTMF: 'Back To Mie Forest',
   TSF: 'Taman Sari Forest',
@@ -92,6 +93,9 @@ export const TOAST_CONFIG = {
 };
 
 export const VALID_POSITIONS_BY_OUTLET: Record<OutletCode, string[]> = {
+  EGG: [
+    'Kepala Media & Informasi'
+  ],
   BTMK: [
     'SPV Komersial', 'SPV Keuangan',
     'Kepala Media & Informasi', 'Senior Staff Support', 'Senior Staff Cashier',
