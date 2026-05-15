@@ -88,6 +88,17 @@ export function canUserRate(
     return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi, dan scope-nya BTMK/BTMF/TSF' };
   }
 
+  if (raterRole === 'direksi') {
+    // Direksi boleh menilai siapapun KECUALI sesama direksi. Prioritas utama
+    // tetap menilai pilar manager via /penilaian-manager (form spesifik divisi);
+    // /penilaian hanya opsi tambahan untuk sub_manager/SPV/staff/freelance —
+    // tidak wajib dinilai semua.
+    if (rateeRole !== 'direksi') {
+      return { canRate: true };
+    }
+    return { canRate: false, reason: 'Direksi tidak bisa menilai sesama direksi' };
+  }
+
   if (raterRole === 'supervisor' || raterRole === 'sub_manager') {
     // Supervisor & sub_manager (manager khusus): scope = outlet sendiri
     // (BTMK + BTMF digabung), hanya boleh menilai staff/freelance
