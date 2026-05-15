@@ -105,15 +105,19 @@ export function canUserRate(
     // (non-penilai). TIDAK boleh rate SPV lain, sub_manager, pilar
     // manager, atau direksi.
     //
-    // Sub-manager dengan outlet EGG (HQ-level, mis. KMI-EGG-001 Kepala
-    // Media & Informasi) bukan terikat outlet operasional — scope-nya
-    // grup BTMK+BTMF (di bawah Manager Komersial).
+    // Sub-manager dengan outlet HQ-level (EGG, ENC) bukan terikat outlet
+    // operasional sendiri — scope-nya grup BTMK+BTMF (di bawah Manager
+    // Komersial). Berlaku untuk:
+    //   - KMI-EGG-001 (Kepala Media & Informasi)
+    //   - OPR-ENC-001 (Manager Operasional Easee n Co — belum punya staff
+    //     di ENC, sementara overlap dengan ops BTMK+BTMF).
+    const HQ_SUB_MANAGER_OUTLETS = ['EGG', 'ENC'];
     const isBTMGroup = ['BTMK', 'BTMF'].includes(raterOutlet) && ['BTMK', 'BTMF'].includes(rateeOutlet);
     const isSameOutlet = raterOutlet === rateeOutlet;
-    const isEggHqScope = raterRole === 'sub_manager' && raterOutlet === 'EGG'
-                         && ['BTMK', 'BTMF'].includes(rateeOutlet);
+    const isHqGroupScope = raterRole === 'sub_manager' && HQ_SUB_MANAGER_OUTLETS.includes(raterOutlet)
+                           && ['BTMK', 'BTMF'].includes(rateeOutlet);
 
-    if (isSameOutlet || isBTMGroup || isEggHqScope) {
+    if (isSameOutlet || isBTMGroup || isHqGroupScope) {
       if (rateeIsNonPenilai) {
         return { canRate: true };
       }
