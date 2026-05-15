@@ -104,10 +104,16 @@ export function canUserRate(
     // (BTMK + BTMF digabung), hanya boleh menilai staff/freelance
     // (non-penilai). TIDAK boleh rate SPV lain, sub_manager, pilar
     // manager, atau direksi.
+    //
+    // Sub-manager dengan outlet EGG (HQ-level, mis. KMI-EGG-001 Kepala
+    // Media & Informasi) bukan terikat outlet operasional — scope-nya
+    // grup BTMK+BTMF (di bawah Manager Komersial).
     const isBTMGroup = ['BTMK', 'BTMF'].includes(raterOutlet) && ['BTMK', 'BTMF'].includes(rateeOutlet);
     const isSameOutlet = raterOutlet === rateeOutlet;
+    const isEggHqScope = raterRole === 'sub_manager' && raterOutlet === 'EGG'
+                         && ['BTMK', 'BTMF'].includes(rateeOutlet);
 
-    if (isSameOutlet || isBTMGroup) {
+    if (isSameOutlet || isBTMGroup || isEggHqScope) {
       if (rateeIsNonPenilai) {
         return { canRate: true };
       }
