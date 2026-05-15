@@ -72,32 +72,31 @@ export function canUserRate(
     return { canRate: false, reason: 'Tidak bisa menilai diri sendiri' };
   }
 
-  // Resolve ratee role — null means staff or freelance (i.e. ratable, non-penilai).
-  // Any non-null value (manager/sub_manager/supervisor/direksi) means the ratee is
-  // a penilai-tier user and is generally NOT ratable by lower or equal tiers.
+  // Resolve ratee role. null = staff/freelance (non-penilai).
   const rateeRole = resolveRole({ id: rateeEmployeeId, position: rateePosition });
   const rateeIsNonPenilai = rateeRole === null;
 
   if (raterRole === 'manager') {
-    // Pillar manager: rate everyone in BTMK/BTMF/TSF except other manager-tier users.
-    // Penilai-tier (sub_manager, supervisor) and other pillar managers cannot be rated
-    // by pillar managers (they are evaluated separately via Direksi).
+    // Pilar manager: rate siapapun di scope BTMK/BTMF/TSF KECUALI sesama
+    // pilar manager dan direksi. Boleh menilai sub_manager, supervisor,
+    // staff, dan freelance.
     if (['BTMK', 'BTMF', 'TSF'].includes(rateeOutlet)) {
-      if (rateeIsNonPenilai) {
+      if (rateeRole !== 'manager' && rateeRole !== 'direksi') {
         return { canRate: true };
       }
     }
-    return { canRate: false, reason: 'Manager hanya bisa menilai staff/freelance di outlet BTMK, BTMF, TSF' };
+    return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi, dan scope-nya BTMK/BTMF/TSF' };
   }
 
   if (raterRole === 'supervisor' || raterRole === 'sub_manager') {
-    // Supervisor and sub-manager share the same scope: only staff/freelance in their
-    // own outlet (BTMK + BTMF grouped as one scope).
+    // Supervisor & sub_manager (manager khusus): scope = outlet sendiri
+    // (BTMK + BTMF digabung), hanya boleh menilai staff/freelance
+    // (non-penilai). TIDAK boleh rate SPV lain, sub_manager, pilar
+    // manager, atau direksi.
     const isBTMGroup = ['BTMK', 'BTMF'].includes(raterOutlet) && ['BTMK', 'BTMF'].includes(rateeOutlet);
     const isSameOutlet = raterOutlet === rateeOutlet;
 
     if (isSameOutlet || isBTMGroup) {
-      // Block rating of any penilai-tier user (other SPV, sub_manager, manager, direksi).
       if (rateeIsNonPenilai) {
         return { canRate: true };
       }
