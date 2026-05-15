@@ -80,12 +80,18 @@ export function canUserRate(
     // Pilar manager: rate siapapun di scope BTMK/BTMF/TSF KECUALI sesama
     // pilar manager dan direksi. Boleh menilai sub_manager, supervisor,
     // staff, dan freelance.
-    if (['BTMK', 'BTMF', 'TSF'].includes(rateeOutlet)) {
+    // Tambahan: HQ staff/freelance (outlet EGG, mis. AK-EGG-001 Staff
+    // Akuntansi) juga rateable oleh SEMUA pilar manager — HQ staff
+    // dievaluasi semua direksi/manager karena tidak terikat outlet
+    // operasional.
+    const isInPillarScope = ['BTMK', 'BTMF', 'TSF'].includes(rateeOutlet);
+    const isHqNonPenilai = rateeOutlet === 'EGG' && rateeIsNonPenilai;
+    if (isInPillarScope || isHqNonPenilai) {
       if (rateeRole !== 'manager' && rateeRole !== 'direksi') {
         return { canRate: true };
       }
     }
-    return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi, dan scope-nya BTMK/BTMF/TSF' };
+    return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi (scope BTMK/BTMF/TSF + HQ staff EGG)' };
   }
 
   if (raterRole === 'direksi') {
@@ -116,8 +122,11 @@ export function canUserRate(
     const isSameOutlet = raterOutlet === rateeOutlet;
     const isHqGroupScope = raterRole === 'sub_manager' && HQ_SUB_MANAGER_OUTLETS.includes(raterOutlet)
                            && ['BTMK', 'BTMF'].includes(rateeOutlet);
+    // SEMUA SPV (apapun outlet-nya) bisa rate HQ staff/freelance di outlet EGG
+    // (mis. AK-EGG-001 Staff Akuntansi). Tidak berlaku untuk sub_manager.
+    const isSpvRateHqStaff = raterRole === 'supervisor' && rateeOutlet === 'EGG';
 
-    if (isSameOutlet || isBTMGroup || isHqGroupScope) {
+    if (isSameOutlet || isBTMGroup || isHqGroupScope || isSpvRateHqStaff) {
       if (rateeIsNonPenilai) {
         return { canRate: true };
       }

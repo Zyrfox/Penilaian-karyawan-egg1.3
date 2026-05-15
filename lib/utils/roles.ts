@@ -76,12 +76,19 @@ export function resolveRole({ id, position }: RoleSubject): Role | null {
   // Freelance — not a penilai
   if (prefix === 'FRL') return null;
 
-  // Any OTHER role-prefix = specialised/department manager.
-  // E.g. KMI-BTMK-001, OPR-ENC-001, ANM-TSF-001. Manager-tier for login,
-  // but rates like supervisor (scope = own outlet, staff/freelance only).
-  if (prefix && !PILLAR_ROLE_PREFIXES.has(prefix)) return 'sub_manager';
+  // Non-pillar role prefix (KMI, OPR, ANM, AK, …) bisa berarti sub-manager
+  // ATAU staff (mis. AK-EGG-001 "Staff Akuntansi"). Pakai keyword posisi
+  // untuk disambiguate — posisi adalah source of truth, bukan prefix.
+  if (prefix && !PILLAR_ROLE_PREFIXES.has(prefix)) {
+    if (pos.includes('STAFF') || pos.includes('FREELANCE')) return null; // non-penilai
+    if (pos.includes('MANAGER') || pos.includes('KEPALA') || pos.includes('DIREKTUR')) return 'sub_manager';
+    // Default conservative: kalau ragu, treat sebagai non-penilai supaya
+    // tidak salah kasih akses login. User bisa update posisi di sheet
+    // untuk diangkat jadi sub_manager (tambahkan "Manager"/"Kepala").
+    return null;
+  }
 
-  // Position-keyword fallback for IDs without a role prefix (legacy / overrides).
+  // Position-keyword fallback untuk ID tanpa role prefix (legacy / overrides).
   if (pos.includes('MANAGER')) return 'manager';
   if (pos.includes('SPV') || SUPERVISORS.includes(id) || PENILAI_KHUSUS.includes(id)) return 'supervisor';
 
