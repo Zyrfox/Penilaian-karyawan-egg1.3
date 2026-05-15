@@ -48,12 +48,13 @@ export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005',
 export const PENILAI_KHUSUS: string[] = [];
 
 /** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat.
- *  `sub_manager` (KMI-/OPR-/ANM-…) adalah manager-tier untuk login → pakai password manager,
- *  tapi rule penilaiannya seperti SPV (lihat canUserRate). */
+ *  `sub_manager` (KMI-/OPR-/ANM-…) pakai password SAMA dengan SPV (EGG2026)
+ *  karena rule penilaiannya setara SPV (cuma rate staff/freelance). Tag UI
+ *  tetap "Manager" sesuai posisi spesifik, tapi auth tier-nya = supervisor. */
 export const ROLE_PASSWORDS = {
   supervisor:  'EGG2026',
   manager:     'EGG_MANAGER2026',
-  sub_manager: 'EGG_MANAGER2026',
+  sub_manager: 'EGG2026',
   direksi:     'EGG_DIREKSI2026',
 } as const;
 
