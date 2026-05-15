@@ -77,21 +77,13 @@ export function canUserRate(
   const rateeIsNonPenilai = rateeRole === null;
 
   if (raterRole === 'manager') {
-    // Pilar manager: rate siapapun di scope BTMK/BTMF/TSF KECUALI sesama
-    // pilar manager dan direksi. Boleh menilai sub_manager, supervisor,
-    // staff, dan freelance.
-    // Tambahan: HQ staff/freelance (outlet EGG, mis. AK-EGG-001 Staff
-    // Akuntansi) juga rateable oleh SEMUA pilar manager — HQ staff
-    // dievaluasi semua direksi/manager karena tidak terikat outlet
-    // operasional.
-    const isInPillarScope = ['BTMK', 'BTMF', 'TSF'].includes(rateeOutlet);
-    const isHqNonPenilai = rateeOutlet === 'EGG' && rateeIsNonPenilai;
-    if (isInPillarScope || isHqNonPenilai) {
-      if (rateeRole !== 'manager' && rateeRole !== 'direksi') {
-        return { canRate: true };
-      }
+    // Pilar manager (MGR-001..004, MGR-FRC-001, MGR-EGC-001): bisa menilai
+    // sub_manager, supervisor, staff, freelance LINTAS OUTLET. Yang TIDAK
+    // boleh dinilai: sesama pilar manager dan direksi.
+    if (rateeRole !== 'manager' && rateeRole !== 'direksi') {
+      return { canRate: true };
     }
-    return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi (scope BTMK/BTMF/TSF + HQ staff EGG)' };
+    return { canRate: false, reason: 'Pilar manager tidak bisa menilai sesama pilar manager atau direksi' };
   }
 
   if (raterRole === 'direksi') {
