@@ -390,6 +390,30 @@ export default function PenilaianPage() {
             </div>
           )}
 
+          {/* Ringkasan breakdown — hanya untuk role yang dikategorikan (direksi & manager) */}
+          {employees.length > 0 && (currentUser?.role === 'direksi' || currentUser?.role === 'manager') && (() => {
+            const counts = { sub: 0, spv: 0, staff: 0, freelance: 0 };
+            employees.forEach((emp) => {
+              const r = resolveRole({ id: emp.id, position: emp.position });
+              const prefix = parseEmployeeId(emp.id || '').rolePrefix;
+              if (r === 'sub_manager') counts.sub++;
+              else if (r === 'supervisor') counts.spv++;
+              else if (prefix === 'FRL') counts.freelance++;
+              else if (r === null) counts.staff++;
+            });
+            const total = counts.sub + counts.spv + counts.staff + counts.freelance;
+            return (
+              <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2 text-xs relative z-10">
+                <span className="font-bold text-neutral-500">Total: <span className="text-neutral-900">{total} orang</span></span>
+                <span className="text-neutral-300">•</span>
+                <span className="px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200 font-bold">Sub-Manager: {counts.sub}</span>
+                <span className="px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200 font-bold">SPV: {counts.spv}</span>
+                <span className="px-2 py-0.5 rounded-full border bg-neutral-100 text-neutral-700 border-neutral-200 font-bold">Staff: {counts.staff}</span>
+                <span className="px-2 py-0.5 rounded-full border bg-teal-50 text-teal-700 border-teal-200 font-bold">Freelance: {counts.freelance}</span>
+              </div>
+            );
+          })()}
+
           <div className="flex-1 overflow-y-auto pr-1 space-y-3 relative z-10">
             {employees.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white border border-dashed border-neutral-300 rounded-2xl">
