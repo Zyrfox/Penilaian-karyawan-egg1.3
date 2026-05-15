@@ -123,6 +123,7 @@ export default function LoginPage() {
     switch (resolveRole({ id: emp.id, position: emp.position })) {
       case 'direksi': return 'Direksi';
       case 'manager': return 'Manager';
+      case 'sub_manager': return 'Manager';
       case 'supervisor': return 'Supervisor';
       default: return '';
     }
@@ -132,6 +133,7 @@ export default function LoginPage() {
     switch (resolveRole({ id: emp.id, position: emp.position })) {
       case 'direksi': return 'bg-[#1a1a1a] text-white';
       case 'manager': return 'bg-violet-100 text-violet-700';
+      case 'sub_manager': return 'bg-amber-100 text-amber-700';
       case 'supervisor': return 'bg-blue-100 text-blue-700';
       default: return 'bg-neutral-100 text-neutral-600';
     }

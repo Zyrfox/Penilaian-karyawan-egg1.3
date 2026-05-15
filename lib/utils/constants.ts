@@ -46,11 +46,14 @@ export const SUPERVISORS: string[] = [];
 export const DIRECTORS = ['DRK-001', 'DRK-002', 'DRK-003', 'DRK-004', 'DRK-005', 'DRK-006'];
 export const PENILAI_KHUSUS: string[] = [];
 
-/** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat */
+/** Password per role — satu sumber kebenaran, tidak perlu ubah di banyak tempat.
+ *  `sub_manager` (KMI-/OPR-/ANM-…) adalah manager-tier untuk login → pakai password manager,
+ *  tapi rule penilaiannya seperti SPV (lihat canUserRate). */
 export const ROLE_PASSWORDS = {
-  supervisor: 'EGG2026',
-  manager:    'EGG_MANAGER2026',
-  direksi:    'EGG_DIREKSI2026',
+  supervisor:  'EGG2026',
+  manager:     'EGG_MANAGER2026',
+  sub_manager: 'EGG_MANAGER2026',
+  direksi:     'EGG_DIREKSI2026',
 } as const;
 
 export const PENILAIAN_TARGETS: Record<string, string[]> = {

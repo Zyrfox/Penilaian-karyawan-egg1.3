@@ -1,11 +1,16 @@
-import { DIRECTORS, MANAGERS, SUPERVISORS, PENILAI_KHUSUS } from './constants';
+import { DIRECTORS, MANAGERS, SUPERVISORS, PENILAI_KHUSUS, VALID_OUTLETS } from './constants';
 
-export type Role = 'direksi' | 'manager' | 'supervisor';
-export type RolePrefix = 'DRK' | 'MGR' | 'SPV' | 'FRL';
+// Role tiers (internal):
+// - direksi     : top-level
+// - manager     : pillar manager (MGR- prefix) — rates everyone in BTMK/BTMF/TSF except other manager-tier
+// - sub_manager : specialised/department manager (e.g. KMI-, OPR-, ANM-) — manager-tier login but
+//                 rates like supervisor: only staff/freelance in their own outlet scope
+// - supervisor  : SPV- prefix — only staff/freelance in their own outlet scope
+export type Role = 'direksi' | 'manager' | 'sub_manager' | 'supervisor';
 
 export interface ParsedId {
-  rolePrefix?: RolePrefix;
-  outlet?: string;
+  rolePrefix?: string;   // any alphabetic role prefix (DRK/MGR/SPV/FRL/KMI/OPR/ANM/…)
+  outlet?: string;       // outlet code (BTMK, BTMF, TSF, …)
   number?: string;
 }
 
@@ -14,53 +19,84 @@ export interface RoleSubject {
   position?: string;
 }
 
-const ID_PATTERN = /^(?:(DRK|MGR|SPV|FRL)-)?(?:([A-Z]+)-)?(\d+)$/;
+// Pattern accepts up to two alphabetic segments before the numeric tail.
+// Examples:
+//   MGR-001         → seg1='MGR', seg2=undefined
+//   MGR-FRC-001     → seg1='MGR', seg2='FRC'
+//   SPV-BTMK-001    → seg1='SPV', seg2='BTMK'
+//   KMI-BTMK-001    → seg1='KMI', seg2='BTMK'
+//   BTMK-001        → seg1='BTMK', seg2=undefined  (single segment = outlet)
+//   DRK-001         → seg1='DRK',  seg2=undefined  (single segment = role)
+const ID_PATTERN = /^(?:([A-Z]+)-)?(?:([A-Z]+)-)?(\d+)$/;
 
 const ADMIN_ALIAS = 'admin.media@easygoing.id';
+
+// Role prefixes that are NOT manager-tier. Anything else with a role-prefix
+// (i.e. not DRK/MGR/SPV/FRL) is treated as a sub_manager (specialised manager).
+const PILLAR_ROLE_PREFIXES = new Set(['DRK', 'MGR', 'SPV', 'FRL']);
 
 export function parseEmployeeId(id: string): ParsedId {
   if (!id) return {};
   const match = id.match(ID_PATTERN);
   if (!match) return {};
-  const [, rolePrefix, outlet, number] = match;
-  return {
-    rolePrefix: rolePrefix as RolePrefix | undefined,
-    outlet: outlet || undefined,
-    number,
-  };
+  const [, seg1, seg2, number] = match;
+
+  // Two segments: first is role prefix, second is outlet.
+  if (seg1 && seg2) {
+    return { rolePrefix: seg1, outlet: seg2, number };
+  }
+  // Single segment: decide by checking the known outlet list.
+  if (seg1) {
+    if ((VALID_OUTLETS as readonly string[]).includes(seg1)) {
+      return { outlet: seg1, number };
+    }
+    return { rolePrefix: seg1, number };
+  }
+  return { number };
 }
 
 export function resolveRole({ id, position }: RoleSubject): Role | null {
   if (!id) return null;
   const pos = (position || '').toUpperCase();
   const parsed = parseEmployeeId(id);
+  const prefix = parsed.rolePrefix;
 
-  if (parsed.rolePrefix === 'DRK' || DIRECTORS.includes(id)) return 'direksi';
+  // Direksi
+  if (prefix === 'DRK' || DIRECTORS.includes(id)) return 'direksi';
 
-  if (
-    id === ADMIN_ALIAS ||
-    parsed.rolePrefix === 'MGR' ||
-    pos.includes('MANAGER') ||
-    MANAGERS.includes(id)
-  ) {
-    return 'manager';
-  }
+  // Admin alias is a pillar manager
+  if (id === ADMIN_ALIAS) return 'manager';
 
-  if (
-    parsed.rolePrefix === 'SPV' ||
-    pos.includes('SPV') ||
-    SUPERVISORS.includes(id) ||
-    PENILAI_KHUSUS.includes(id)
-  ) {
-    return 'supervisor';
-  }
+  // Pillar manager (MGR- prefix)
+  if (prefix === 'MGR' || MANAGERS.includes(id)) return 'manager';
+
+  // Supervisor (SPV- prefix)
+  if (prefix === 'SPV') return 'supervisor';
+
+  // Freelance — not a penilai
+  if (prefix === 'FRL') return null;
+
+  // Any OTHER role-prefix = specialised/department manager.
+  // E.g. KMI-BTMK-001, OPR-ENC-001, ANM-TSF-001. Manager-tier for login,
+  // but rates like supervisor (scope = own outlet, staff/freelance only).
+  if (prefix && !PILLAR_ROLE_PREFIXES.has(prefix)) return 'sub_manager';
+
+  // Position-keyword fallback for IDs without a role prefix (legacy / overrides).
+  if (pos.includes('MANAGER')) return 'manager';
+  if (pos.includes('SPV') || SUPERVISORS.includes(id) || PENILAI_KHUSUS.includes(id)) return 'supervisor';
 
   return null;
 }
 
 export const isDireksi = (s: RoleSubject) => resolveRole(s) === 'direksi';
 export const isManager = (s: RoleSubject) => resolveRole(s) === 'manager';
+export const isSubManager = (s: RoleSubject) => resolveRole(s) === 'sub_manager';
 export const isSupervisor = (s: RoleSubject) => resolveRole(s) === 'supervisor';
+// Convenience: any manager-tier role (pillar OR sub).
+export const isAnyManager = (s: RoleSubject) => {
+  const r = resolveRole(s);
+  return r === 'manager' || r === 'sub_manager';
+};
 
 export function outletFromId(id: string): string {
   return parseEmployeeId(id).outlet || '';
