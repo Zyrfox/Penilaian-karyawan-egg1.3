@@ -122,11 +122,12 @@ export function canUserRate(
     const isSameOutlet = raterOutlet === rateeOutlet;
     const isHqGroupScope = raterRole === 'sub_manager' && HQ_SUB_MANAGER_OUTLETS.includes(raterOutlet)
                            && ['BTMK', 'BTMF'].includes(rateeOutlet);
-    // SEMUA SPV (apapun outlet-nya) bisa rate HQ staff/freelance di outlet EGG
-    // (mis. AK-EGG-001 Staff Akuntansi). Tidak berlaku untuk sub_manager.
-    const isSpvRateHqStaff = raterRole === 'supervisor' && rateeOutlet === 'EGG';
+    // SEMUA SPV & sub_manager (apapun outlet-nya) bisa rate HQ staff/freelance
+    // di outlet EGG (mis. AK-001 Staff Akuntansi). HQ staff dievaluasi lintas
+    // outlet karena tidak terikat operasi outlet manapun.
+    const isHqStaffRateable = rateeOutlet === 'EGG';
 
-    if (isSameOutlet || isBTMGroup || isHqGroupScope || isSpvRateHqStaff) {
+    if (isSameOutlet || isBTMGroup || isHqGroupScope || isHqStaffRateable) {
       if (rateeIsNonPenilai) {
         return { canRate: true };
       }
