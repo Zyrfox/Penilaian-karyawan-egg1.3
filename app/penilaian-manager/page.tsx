@@ -8,7 +8,6 @@ import { RatingGrade, RATING_SCALE } from '@/lib/types';
 import {
   getManagerQuestions,
   getManagerDivision,
-  MANAGER_DIVISION_MAP,
   ManagerQuestion,
 } from '@/lib/utils/manager-questions';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -351,9 +350,12 @@ export default function PenilaianManagerPage() {
       const dataMgrRatings = await resMgrRatings.json();
 
       if (dataMaster.success) {
-        // Filter hanya manager (ID yang ada di MANAGER_DIVISION_MAP)
-        const managerIds = Object.keys(MANAGER_DIVISION_MAP);
-        const managerList = dataMaster.data.filter((e: any) => managerIds.includes(e.id));
+        // Filter hanya pilar manager: ID berawalan `MGR-` (HQ atau outlet-scoped).
+        // Sub-manager seperti KMI-/OPR-/ANM- tidak masuk ke /penilaian-manager —
+        // mereka dinilai via /penilaian seperti SPV.
+        const managerList = dataMaster.data.filter((e: any) =>
+          typeof e.id === 'string' && e.id.startsWith('MGR-')
+        );
         setManagers(managerList);
 
         // Load drafts

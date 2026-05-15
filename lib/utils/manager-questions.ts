@@ -123,14 +123,14 @@ export const SPECIFIC_MANAGER_QUESTIONS: Record<ManagerDivision, ManagerQuestion
   ],
 };
 
-// Mapping ID manager ke divisinya
+// Mapping ID manager ke divisinya (untuk pertanyaan spesifik divisi).
+// Pilar manager HQ (MGR-NNN) punya divisi SDM/Keuangan/Inventory/Komersial.
+// Manager outlet-scoped (MGR-XXX-NNN) default 'Lainnya' — hanya pertanyaan general.
 export const MANAGER_DIVISION_MAP: Record<string, ManagerDivision> = {
   'MGR-001': 'SDM',
   'MGR-002': 'Keuangan',
   'MGR-003': 'Inventory',
   'MGR-004': 'Komersial',
-  'FRC-001': 'Lainnya',
-  'EGC-001': 'Lainnya',
 };
 
 // Ambil seluruh pertanyaan untuk satu manager (4 general + 3 spesifik = 7 total)
