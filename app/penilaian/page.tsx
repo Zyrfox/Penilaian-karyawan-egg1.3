@@ -423,7 +423,9 @@ export default function PenilaianPage() {
               </div>
             ) : (() => {
               const role = currentUser?.role;
-              const hideQuickFill = role === 'direksi';
+              // Auto-rate (Isi Cepat A/B/C/D/E) hanya untuk pilar manager.
+              // Direksi, sub_manager, dan SPV harus pilih nilai per-kriteria.
+              const hideQuickFill = role === 'direksi' || role === 'sub_manager' || role === 'supervisor';
               const renderCard = (emp: any) => (
                 <RatingCard
                   key={emp.id}
