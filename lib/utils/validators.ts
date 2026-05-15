@@ -89,14 +89,14 @@ export function canUserRate(
   }
 
   if (raterRole === 'direksi') {
-    // Direksi boleh menilai siapapun KECUALI sesama direksi. Prioritas utama
-    // tetap menilai pilar manager via /penilaian-manager (form spesifik divisi);
-    // /penilaian hanya opsi tambahan untuk sub_manager/SPV/staff/freelance —
-    // tidak wajib dinilai semua.
-    if (rateeRole !== 'direksi') {
+    // Direksi via /penilaian: hanya sub_manager / SPV / staff / freelance.
+    // Pilar manager dinilai terpisah via /penilaian-manager (form spesifik
+    // divisi SDM/Keuangan/Inventory/Komersial) — tidak boleh nyasar ke list
+    // di /penilaian. Sesama direksi & self-rate juga diblok.
+    if (rateeRole !== 'direksi' && rateeRole !== 'manager') {
       return { canRate: true };
     }
-    return { canRate: false, reason: 'Direksi tidak bisa menilai sesama direksi' };
+    return { canRate: false, reason: 'Pilar manager dinilai via /penilaian-manager (bukan di /penilaian) dan direksi tidak menilai sesama direksi' };
   }
 
   if (raterRole === 'supervisor' || raterRole === 'sub_manager') {

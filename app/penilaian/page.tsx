@@ -429,10 +429,13 @@ export default function PenilaianPage() {
               };
               employees.forEach((emp) => {
                 const r = resolveRole({ id: emp.id, position: emp.position });
+                const prefix = parseEmployeeId(emp.id || '').rolePrefix;
                 if (r === 'sub_manager') buckets['Sub-Manager'].push(emp);
                 else if (r === 'supervisor') buckets['Supervisor (SPV)'].push(emp);
-                else if (parseEmployeeId(emp.id || '').rolePrefix === 'FRL') buckets.Freelance.push(emp);
-                else buckets.Staff.push(emp);
+                else if (prefix === 'FRL') buckets.Freelance.push(emp);
+                else if (r === null) buckets.Staff.push(emp);
+                // pilar manager / direksi shouldn't end up here (canUserRate blocks);
+                // skip them defensively kalau lolos.
               });
 
               const SECTION_STYLE: Record<string, string> = {
