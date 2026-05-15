@@ -13,6 +13,7 @@ interface RatingCardProps {
   draftRatings: Record<RatingCategory, RatingGrade> | null;
   onToggleExpand: (id: string) => void;
   onSaveDraft: (id: string, ratings: Record<RatingCategory, RatingGrade>) => void;
+  hideQuickFill?: boolean;
 }
 
 // Color config per grade
@@ -127,6 +128,7 @@ export function RatingCard({
   draftRatings,
   onToggleExpand,
   onSaveDraft,
+  hideQuickFill,
 }: RatingCardProps) {
   const [ratings, setRatings] = useState<Record<string, RatingGrade>>(() => {
     if (draftRatings) return draftRatings;
@@ -223,7 +225,7 @@ export function RatingCard({
           )}
 
           {/* Quick Accumulation Grade Buttons */}
-          {!isLocked && (
+          {!isLocked && !hideQuickFill && (
             <div className="mb-6 bg-blue-50/50 p-3 sm:p-4 rounded-xl border border-blue-100">
                <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                  <div>

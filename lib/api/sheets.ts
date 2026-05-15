@@ -43,8 +43,18 @@ export async function getMasterList() {
         status: row[4]?.trim() || 'Aktif',
         _rowNumber: index + 1
       }))
-      .slice(1) // exclude header
-      .filter(emp => emp.name !== ''); // Hanya ambil yang memiliki "Nama Lengkap"
+      .slice(1) // exclude top header row
+      // Skip empty rows (nama kosong) DAN baris header section di tengah sheet —
+      // setiap tabel section (Manager, Supervisor, BTMK_Staff, dst) punya
+      // header sendiri dengan nama "Nama Lengkap" / id "ID …" / position
+      // "Posisi Spesifik". Filter ini melindungi parser dari salah anggap
+      // baris header sebagai karyawan.
+      .filter(emp =>
+        emp.name !== '' &&
+        emp.name !== 'Nama Lengkap' &&
+        emp.position !== 'Posisi Spesifik' &&
+        !emp.id.startsWith('ID ')
+      );
   } catch (error: any) {
     console.error('getSheetsError (MasterList):', error);
     throw new Error('Gagal mengambil data dari server. Coba lagi.');

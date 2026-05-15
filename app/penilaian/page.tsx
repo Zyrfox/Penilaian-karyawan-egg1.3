@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { canUserRate } from '@/lib/utils/validators';
 import { isRamadan, calculateScoreWithBonus } from '@/lib/utils/calculations';
 import { RATING_CATEGORIES } from '@/lib/utils/constants';
+import { resolveRole, parseEmployeeId } from '@/lib/utils/roles';
 import { RatingCategory, RatingGrade, RATING_SCALE } from '@/lib/types';
 
 
@@ -396,8 +397,10 @@ export default function PenilaianPage() {
                 <h3 className="text-lg font-bold text-neutral-900 mb-1">Semua Selesai!</h3>
                 <p className="text-neutral-500 text-sm">Tidak ada karyawan yang perlu Anda nilai saat ini.</p>
               </div>
-            ) : (
-              employees.map((emp) => (
+            ) : (() => {
+              const role = currentUser?.role;
+              const hideQuickFill = role === 'direksi';
+              const renderCard = (emp: any) => (
                 <RatingCard
                   key={emp.id}
                   employee={emp}
@@ -407,9 +410,57 @@ export default function PenilaianPage() {
                   draftRatings={drafts[emp.id] || null}
                   onToggleExpand={(id) => setExpandedId(expandedId === id ? null : id)}
                   onSaveDraft={handleSaveDraft}
+                  hideQuickFill={hideQuickFill}
                 />
-              ))
-            )}
+              );
+
+              // Direksi & pilar Manager melihat banyak tipe karyawan sekaligus —
+              // dikelompokkan supaya gampang dipilah saat menilai.
+              const shouldCategorize = role === 'direksi' || role === 'manager';
+              if (!shouldCategorize) {
+                return <>{employees.map(renderCard)}</>;
+              }
+
+              const buckets: Record<string, any[]> = {
+                'Sub-Manager': [],
+                'Supervisor (SPV)': [],
+                Staff: [],
+                Freelance: [],
+              };
+              employees.forEach((emp) => {
+                const r = resolveRole({ id: emp.id, position: emp.position });
+                if (r === 'sub_manager') buckets['Sub-Manager'].push(emp);
+                else if (r === 'supervisor') buckets['Supervisor (SPV)'].push(emp);
+                else if (parseEmployeeId(emp.id || '').rolePrefix === 'FRL') buckets.Freelance.push(emp);
+                else buckets.Staff.push(emp);
+              });
+
+              const SECTION_STYLE: Record<string, string> = {
+                'Sub-Manager': 'bg-amber-50 text-amber-700 border-amber-200',
+                'Supervisor (SPV)': 'bg-blue-50 text-blue-700 border-blue-200',
+                Staff: 'bg-neutral-100 text-neutral-700 border-neutral-200',
+                Freelance: 'bg-teal-50 text-teal-700 border-teal-200',
+              };
+
+              return (
+                <>
+                  {Object.entries(buckets).map(([label, list]) =>
+                    list.length === 0 ? null : (
+                      <section key={label} className="space-y-2">
+                        <div className="flex items-center gap-2 sticky top-0 bg-white/80 backdrop-blur-sm py-1.5 z-10">
+                          <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full border ${SECTION_STYLE[label]}`}>
+                            {label}
+                          </span>
+                          <span className="text-xs font-bold text-neutral-400">{list.length} orang</span>
+                          <div className="flex-1 h-px bg-neutral-200/70" />
+                        </div>
+                        <div className="space-y-2">{list.map(renderCard)}</div>
+                      </section>
+                    )
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {employees.length > 0 && (
